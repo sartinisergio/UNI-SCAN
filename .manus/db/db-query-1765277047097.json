@@ -1,0 +1,20 @@
+{
+  "query": "SELECT id, name, code FROM subjects WHERE name LIKE '%Chimica%' OR code LIKE '%CHIM%'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2SqZsxfbXQHvi7k.root --database EnsVFtthx7GmB9n2DgDusz --execute SELECT id, name, code FROM subjects WHERE name LIKE '%Chimica%' OR code LIKE '%CHIM%'",
+  "rows": [
+    {
+      "id": "6",
+      "name": "Chimica Generale",
+      "code": "chimica_generale"
+    },
+    {
+      "id": "7",
+      "name": "Chimica Organica",
+      "code": "chimica_organica"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tcode\n6\tChimica Generale\tchimica_generale\n7\tChimica Organica\tchimica_organica\n",
+  "stderr": "",
+  "execution_time_ms": 103
+}

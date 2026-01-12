@@ -1,0 +1,25 @@
+{
+  "query": "SHOW CREATE TABLE frameworks",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2SqZsxfbXQHvi7k.root --database EnsVFtthx7GmB9n2DgDusz --execute SHOW CREATE TABLE frameworks",
+  "rows": [
+    {
+      "Table": "frameworks",
+      "Create Table": "CREATE TABLE `frameworks` ("
+    }
+  ],
+  "messages": [
+    "  `id` int(11) NOT NULL AUTO_INCREMENT,",
+    "  `subjectId` int(11) NOT NULL,",
+    "  `version` varchar(32) NOT NULL,",
+    "  `content` json NOT NULL,",
+    "  `isActive` tinyint(1) NOT NULL DEFAULT '1',",
+    "  `createdBy` int(11) NOT NULL,",
+    "  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,",
+    "  `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,",
+    "  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */",
+    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin AUTO_INCREMENT=30001"
+  ],
+  "stdout": "Table\tCreate Table\nframeworks\tCREATE TABLE `frameworks` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `subjectId` int(11) NOT NULL,\n  `version` varchar(32) NOT NULL,\n  `content` json NOT NULL,\n  `isActive` tinyint(1) NOT NULL DEFAULT '1',\n  `createdBy` int(11) NOT NULL,\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin AUTO_INCREMENT=30001\n",
+  "stderr": "",
+  "execution_time_ms": 1196
+}

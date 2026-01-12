@@ -1,0 +1,22 @@
+{
+  "query": "SELECT s.name, COUNT(DISTINCT m.id) as count FROM manuals m JOIN subjects s ON m.subjectId = s.id WHERE s.name LIKE '%Chimica%' OR s.name LIKE '%Istologia%' GROUP BY s.name;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2SqZsxfbXQHvi7k.root --database EnsVFtthx7GmB9n2DgDusz --execute SELECT s.name, COUNT(DISTINCT m.id) as count FROM manuals m JOIN subjects s ON m.subjectId = s.id WHERE s.name LIKE '%Chimica%' OR s.name LIKE '%Istologia%' GROUP BY s.name;",
+  "rows": [
+    {
+      "name": "Chimica Generale",
+      "count": "99"
+    },
+    {
+      "name": "Chimica Organica",
+      "count": "44"
+    },
+    {
+      "name": "Istologia",
+      "count": "12"
+    }
+  ],
+  "messages": [],
+  "stdout": "name\tcount\nChimica Generale\t99\nChimica Organica\t44\nIstologia\t12\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}

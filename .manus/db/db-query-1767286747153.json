@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, version, LENGTH(JSON_UNQUOTE(content)) as content_length, LEFT(JSON_UNQUOTE(content), 100) as content_start FROM frameworks WHERE subjectId = (SELECT id FROM subjects WHERE code = 'economia_politica') ORDER BY updatedAt DESC LIMIT 1",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2SqZsxfbXQHvi7k.root --database EnsVFtthx7GmB9n2DgDusz --execute SELECT id, version, LENGTH(JSON_UNQUOTE(content)) as content_length, LEFT(JSON_UNQUOTE(content), 100) as content_start FROM frameworks WHERE subjectId = (SELECT id FROM subjects WHERE code = 'economia_politica') ORDER BY updatedAt DESC LIMIT 1",
+  "rows": [
+    {
+      "id": "5",
+      "version": "1.0",
+      "content_length": "10976",
+      "content_start": "{\"alignment_method\": {\"description\": \"Allineamento = media ponderata dei criteri: score_i = max(0, 1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tversion\tcontent_length\tcontent_start\n5\t1.0\t10976\t{\"alignment_method\": {\"description\": \"Allineamento = media ponderata dei criteri: score_i = max(0, 1\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

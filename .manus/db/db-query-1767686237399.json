@@ -1,0 +1,9 @@
+{
+  "query": "DELETE FROM frameworks WHERE subjectId IN (SELECT id FROM subjects WHERE code IN ('economia_politica', 'analisi_1', 'analisi_2', 'fisica_1', 'fisica_2', 'chimica_generale', 'chimica_organica', 'matematica_bio', 'microeconomia', 'macroeconomia', 'istologia', 'fisica_generale'));",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2SqZsxfbXQHvi7k.root --database EnsVFtthx7GmB9n2DgDusz --execute DELETE FROM frameworks WHERE subjectId IN (SELECT id FROM subjects WHERE code IN ('economia_politica', 'analisi_1', 'analisi_2', 'fisica_1', 'fisica_2', 'chimica_generale', 'chimica_organica', 'matematica_bio', 'microeconomia', 'macroeconomia', 'istologia', 'fisica_generale'));",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 64
+}

@@ -1,0 +1,17 @@
+{
+  "query": "SELECT id, subjectId, version, JSON_EXTRACT(content, '$.framework.name') as framework_name, JSON_EXTRACT(content, '$.alignment_method.description') as alignment_desc FROM frameworks WHERE subjectId = (SELECT id FROM subjects WHERE code = 'economia_politica') LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2SqZsxfbXQHvi7k.root --database EnsVFtthx7GmB9n2DgDusz --execute SELECT id, subjectId, version, JSON_EXTRACT(content, '$.framework.name') as framework_name, JSON_EXTRACT(content, '$.alignment_method.description') as alignment_desc FROM frameworks WHERE subjectId = (SELECT id FROM subjects WHERE code = 'economia_politica') LIMIT 1;",
+  "rows": [
+    {
+      "id": "5",
+      "subjectId": "8",
+      "version": "1.0",
+      "framework_name": "\"Framework Unico Valutazione Economia Politica - Programmi e Manuali\"",
+      "alignment_desc": "\"Allineamento = media ponderata dei criteri: score_i = max(0, 1 - |required_level_i - offered_score_i| / 4)\""
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tsubjectId\tversion\tframework_name\talignment_desc\n5\t8\t1.0\t\"Framework Unico Valutazione Economia Politica - Programmi e Manuali\"\t\"Allineamento = media ponderata dei criteri: score_i = max(0, 1 - |required_level_i - offered_score_i| / 4)\"\n",
+  "stderr": "",
+  "execution_time_ms": 62
+}

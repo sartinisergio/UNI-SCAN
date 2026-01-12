@@ -1,0 +1,8 @@
+{
+  "query": "SELECT m.id, m.title, m.subject_id, s.name FROM manuals m JOIN subjects s ON m.subject_id = s.id WHERE s.name LIKE '%Chimica%' OR s.name LIKE '%Istologia%' ORDER BY s.name, m.title;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2SqZsxfbXQHvi7k.root --database EnsVFtthx7GmB9n2DgDusz --execute SELECT m.id, m.title, m.subject_id, s.name FROM manuals m JOIN subjects s ON m.subject_id = s.id WHERE s.name LIKE '%Chimica%' OR s.name LIKE '%Istologia%' ORDER BY s.name, m.title;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'm.subject_id' in 'on clause'"
+  ]
+}

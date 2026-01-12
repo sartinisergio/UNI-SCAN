@@ -1,0 +1,8 @@
+{
+  "query": "SELECT id, user_id, provider, api_key IS NOT NULL as has_api_key, refresh_token IS NOT NULL as has_refresh_token, token_expires_at FROM api_configs WHERE provider = 'dropbox' LIMIT 5",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2SqZsxfbXQHvi7k.root --database EnsVFtthx7GmB9n2DgDusz --execute SELECT id, user_id, provider, api_key IS NOT NULL as has_api_key, refresh_token IS NOT NULL as has_refresh_token, token_expires_at FROM api_configs WHERE provider = 'dropbox' LIMIT 5",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'user_id' in 'field list'"
+  ]
+}

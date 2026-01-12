@@ -1,0 +1,70 @@
+{
+  "query": "SELECT id, name, code FROM subjects",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2SqZsxfbXQHvi7k.root --database EnsVFtthx7GmB9n2DgDusz --execute SELECT id, name, code FROM subjects",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Analisi 1",
+      "code": "analisi_1"
+    },
+    {
+      "id": "2",
+      "name": "Analisi 2",
+      "code": "analisi_2"
+    },
+    {
+      "id": "3",
+      "name": "Fisica 1",
+      "code": "fisica_1"
+    },
+    {
+      "id": "4",
+      "name": "Fisica 2",
+      "code": "fisica_2"
+    },
+    {
+      "id": "5",
+      "name": "Fisica Generale",
+      "code": "fisica_generale"
+    },
+    {
+      "id": "6",
+      "name": "Chimica Generale",
+      "code": "chimica_generale"
+    },
+    {
+      "id": "7",
+      "name": "Chimica Organica",
+      "code": "chimica_organica"
+    },
+    {
+      "id": "8",
+      "name": "Economia Politica",
+      "code": "economia_politica"
+    },
+    {
+      "id": "9",
+      "name": "Istologia",
+      "code": "istologia"
+    },
+    {
+      "id": "10",
+      "name": "Macroeconomia",
+      "code": "macroeconomia"
+    },
+    {
+      "id": "11",
+      "name": "Microeconomia",
+      "code": "microeconomia"
+    },
+    {
+      "id": "12",
+      "name": "Matematica per Biologia",
+      "code": "matematica_bio"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tcode\n1\tAnalisi 1\tanalisi_1\n2\tAnalisi 2\tanalisi_2\n3\tFisica 1\tfisica_1\n4\tFisica 2\tfisica_2\n5\tFisica Generale\tfisica_generale\n6\tChimica Generale\tchimica_generale\n7\tChimica Organica\tchimica_organica\n8\tEconomia Politica\teconomia_politica\n9\tIstologia\tistologia\n10\tMacroeconomia\tmacroeconomia\n11\tMicroeconomia\tmicroeconomia\n12\tMatematica per Biologia\tmatematica_bio\n",
+  "stderr": "",
+  "execution_time_ms": 153
+}

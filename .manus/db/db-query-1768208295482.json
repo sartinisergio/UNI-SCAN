@@ -1,0 +1,20 @@
+{
+  "query": "SELECT id, code, name FROM subjects WHERE name = 'Biochimica' OR code = 'biochimica';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2SqZsxfbXQHvi7k.root --database EnsVFtthx7GmB9n2DgDusz --execute SELECT id, code, name FROM subjects WHERE name = 'Biochimica' OR code = 'biochimica';",
+  "rows": [
+    {
+      "id": "30001",
+      "code": "biochimica",
+      "name": "Biochimica"
+    },
+    {
+      "id": "30002",
+      "code": "Biochimica",
+      "name": "Biochimica"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tcode\tname\n30001\tbiochimica\tBiochimica\n30002\tBiochimica\tBiochimica\n",
+  "stderr": "",
+  "execution_time_ms": 441
+}

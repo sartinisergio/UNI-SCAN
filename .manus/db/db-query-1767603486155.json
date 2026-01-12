@@ -1,0 +1,18 @@
+{
+  "query": "SELECT id, subjectId, version, SUBSTRING(content, 1, 200) as content_start, SUBSTRING(content, -200) as content_end, LENGTH(content) as content_length FROM frameworks WHERE subjectId = (SELECT id FROM subjects WHERE code = 'economia_politica') LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2SqZsxfbXQHvi7k.root --database EnsVFtthx7GmB9n2DgDusz --execute SELECT id, subjectId, version, SUBSTRING(content, 1, 200) as content_start, SUBSTRING(content, -200) as content_end, LENGTH(content) as content_length FROM frameworks WHERE subjectId = (SELECT id FROM subjects WHERE code = 'economia_politica') LIMIT 1;",
+  "rows": [
+    {
+      "id": "5",
+      "subjectId": "8",
+      "version": "1.0",
+      "content_start": "{\"alignment_method\": {\"description\": \"Allineamento = media ponderata dei criteri: score_i = max(0, 1 - |required_level_i - offered_score_i| / 4)\", \"formula\": \"alignment = Σ(weight_i × score_i) / Σ(wei",
+      "content_end": "\", \"Economia politica comparata\", \"Sostenibilità ambientale\"], \"id\": 12, \"learning_outcomes\": [\"Disuguaglianze strutturali\", \"Bias cognitivi\", \"Modelli istituzionali\"], \"name\": \"Economia e società\"}]}",
+      "content_length": "10976"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tsubjectId\tversion\tcontent_start\tcontent_end\tcontent_length\n5\t8\t1.0\t{\"alignment_method\": {\"description\": \"Allineamento = media ponderata dei criteri: score_i = max(0, 1 - |required_level_i - offered_score_i| / 4)\", \"formula\": \"alignment = Σ(weight_i × score_i) / Σ(wei\t\", \"Economia politica comparata\", \"Sostenibilità ambientale\"], \"id\": 12, \"learning_outcomes\": [\"Disuguaglianze strutturali\", \"Bias cognitivi\", \"Modelli istituzionali\"], \"name\": \"Economia e società\"}]}\t10976\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

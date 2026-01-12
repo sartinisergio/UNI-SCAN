@@ -1,0 +1,940 @@
+{
+  "query": "SELECT m.id, m.title, m.subjectId, s.name FROM manuals m JOIN subjects s ON m.subjectId = s.id WHERE s.name LIKE '%Chimica%' OR s.name LIKE '%Istologia%' ORDER BY s.name, m.title;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2SqZsxfbXQHvi7k.root --database EnsVFtthx7GmB9n2DgDusz --execute SELECT m.id, m.title, m.subjectId, s.name FROM manuals m JOIN subjects s ON m.subjectId = s.id WHERE s.name LIKE '%Chimica%' OR s.name LIKE '%Istologia%' ORDER BY s.name, m.title;",
+  "rows": [
+    {
+      "id": "30040",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30044",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30004",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "4",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "60004",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "36",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "35",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "43",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "90016",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "32",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "90013",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30048",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30034",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "90012",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30037",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "90009",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "90020",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "90006",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "39",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30041",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "29",
+      "title": "Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "25",
+      "title": "Chimica di base",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "90002",
+      "title": "Chimica di base",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30030",
+      "title": "Chimica di base",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "60012",
+      "title": "Chimica generale",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "1",
+      "title": "Chimica generale",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "60007",
+      "title": "Chimica generale",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "12",
+      "title": "Chimica generale",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30001",
+      "title": "Chimica generale",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "60001",
+      "title": "Chimica generale",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "7",
+      "title": "Chimica generale",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30012",
+      "title": "Chimica generale",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30007",
+      "title": "Chimica generale",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30045",
+      "title": "Chimica generale ed inorganica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "90017",
+      "title": "Chimica generale ed inorganica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "40",
+      "title": "Chimica generale ed inorganica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "60005",
+      "title": "Chimica: materia, tecnologia, ambiente",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30005",
+      "title": "Chimica: materia, tecnologia, ambiente",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "5",
+      "title": "Chimica: materia, tecnologia, ambiente",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "90015",
+      "title": "Chimica: natura molecolare della materia",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "38",
+      "title": "Chimica: natura molecolare della materia",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30043",
+      "title": "Chimica: natura molecolare della materia",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30",
+      "title": "Chimica: principi e reazioni",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "90007",
+      "title": "Chimica: principi e reazioni",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30035",
+      "title": "Chimica: principi e reazioni",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30006",
+      "title": "Chimica: struttura, proprietà e trasformazioni della materia",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "60006",
+      "title": "Chimica: struttura, proprietà e trasformazioni della materia",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "6",
+      "title": "Chimica: struttura, proprietà e trasformazioni della materia",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30046",
+      "title": "Chimica: un approccio molecolare",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "90018",
+      "title": "Chimica: un approccio molecolare",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "41",
+      "title": "Chimica: un approccio molecolare",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "60013",
+      "title": "Conoscere la Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30013",
+      "title": "Conoscere la Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "13",
+      "title": "Conoscere la Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "90010",
+      "title": "Elementi di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30038",
+      "title": "Elementi di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "33",
+      "title": "Elementi di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "60010",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30031",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30008",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "90003",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30010",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "37",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30042",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30036",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "34",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "31",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "8",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "60008",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "10",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "90014",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30029",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "26",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30039",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "24",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "90001",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "90011",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "90008",
+      "title": "Fondamenti di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "2",
+      "title": "Fondamenti di Chimica generale",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30002",
+      "title": "Fondamenti di Chimica generale",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "60002",
+      "title": "Fondamenti di Chimica generale",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "9",
+      "title": "Fondamenti di chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "60009",
+      "title": "Fondamenti di chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30009",
+      "title": "Fondamenti di chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "90005",
+      "title": "Fondamenti di chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30033",
+      "title": "Fondamenti di chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "28",
+      "title": "Fondamenti di chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30047",
+      "title": "Introduzione alla Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "42",
+      "title": "Introduzione alla Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "90019",
+      "title": "Introduzione alla Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "11",
+      "title": "La Chimica di base",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "60011",
+      "title": "La Chimica di base",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30011",
+      "title": "La Chimica di base",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "60003",
+      "title": "Principi di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30003",
+      "title": "Principi di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "3",
+      "title": "Principi di Chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "30032",
+      "title": "Viaggio nella chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "27",
+      "title": "Viaggio nella chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "90004",
+      "title": "Viaggio nella chimica",
+      "subjectId": "6",
+      "name": "Chimica Generale"
+    },
+    {
+      "id": "50",
+      "title": "Chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "30053",
+      "title": "Chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "90025",
+      "title": "Chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "90024",
+      "title": "Chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "60018",
+      "title": "Chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "90022",
+      "title": "Chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "90021",
+      "title": "Chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "30055",
+      "title": "Chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "30017",
+      "title": "Chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "18",
+      "title": "Chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "30018",
+      "title": "Chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "60017",
+      "title": "Chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "30050",
+      "title": "Chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "30049",
+      "title": "Chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "44",
+      "title": "Chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "45",
+      "title": "Chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "48",
+      "title": "Chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "17",
+      "title": "Chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "30051",
+      "title": "Chimica organica essenziale",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "46",
+      "title": "Chimica organica essenziale",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "90023",
+      "title": "Chimica organica essenziale",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "30016",
+      "title": "Chimica organica: approccio biologico",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "60016",
+      "title": "Chimica organica: approccio biologico",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "16",
+      "title": "Chimica organica: approccio biologico",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "49",
+      "title": "Elementi di chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "30054",
+      "title": "Elementi di chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "90026",
+      "title": "Fondamenti di chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "15",
+      "title": "Fondamenti di chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "52",
+      "title": "Fondamenti di chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "60014",
+      "title": "Fondamenti di chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "30015",
+      "title": "Fondamenti di chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "53",
+      "title": "Fondamenti di chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "90027",
+      "title": "Fondamenti di chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "51",
+      "title": "Fondamenti di chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "30057",
+      "title": "Fondamenti di chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "14",
+      "title": "Fondamenti di chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "30056",
+      "title": "Fondamenti di chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "30014",
+      "title": "Fondamenti di chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "60015",
+      "title": "Fondamenti di chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "90028",
+      "title": "Fondamenti di chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "30058",
+      "title": "Fondamenti di chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "30052",
+      "title": "Introduzione alla chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "47",
+      "title": "Introduzione alla chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "90029",
+      "title": "Introduzione alla chimica organica",
+      "subjectId": "7",
+      "name": "Chimica Organica"
+    },
+    {
+      "id": "30081",
+      "title": "Dalle cellule ai sistemi",
+      "subjectId": "9",
+      "name": "Istologia"
+    },
+    {
+      "id": "64",
+      "title": "Dalle cellule ai sistemi",
+      "subjectId": "9",
+      "name": "Istologia"
+    },
+    {
+      "id": "90052",
+      "title": "Dalle cellule ai sistemi",
+      "subjectId": "9",
+      "name": "Istologia"
+    },
+    {
+      "id": "30083",
+      "title": "Istologia",
+      "subjectId": "9",
+      "name": "Istologia"
+    },
+    {
+      "id": "30082",
+      "title": "Istologia",
+      "subjectId": "9",
+      "name": "Istologia"
+    },
+    {
+      "id": "30028",
+      "title": "Istologia",
+      "subjectId": "9",
+      "name": "Istologia"
+    },
+    {
+      "id": "65",
+      "title": "Istologia",
+      "subjectId": "9",
+      "name": "Istologia"
+    },
+    {
+      "id": "23",
+      "title": "Istologia",
+      "subjectId": "9",
+      "name": "Istologia"
+    },
+    {
+      "id": "60027",
+      "title": "Istologia",
+      "subjectId": "9",
+      "name": "Istologia"
+    },
+    {
+      "id": "66",
+      "title": "Istologia",
+      "subjectId": "9",
+      "name": "Istologia"
+    },
+    {
+      "id": "90053",
+      "title": "Istologia",
+      "subjectId": "9",
+      "name": "Istologia"
+    },
+    {
+      "id": "90054",
+      "title": "Istologia",
+      "subjectId": "9",
+      "name": "Istologia"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tsubjectId\tname\n30040\tChimica\t6\tChimica Generale\n30044\tChimica\t6\tChimica Generale\n30004\tChimica\t6\tChimica Generale\n4\tChimica\t6\tChimica Generale\n60004\tChimica\t6\tChimica Generale\n36\tChimica\t6\tChimica Generale\n35\tChimica\t6\tChimica Generale\n43\tChimica\t6\tChimica Generale\n90016\tChimica\t6\tChimica Generale\n32\tChimica\t6\tChimica Generale\n90013\tChimica\t6\tChimica Generale\n30048\tChimica\t6\tChimica Generale\n30034\tChimica\t6\tChimica Generale\n90012\tChimica\t6\tChimica Generale\n30037\tChimica\t6\tChimica Generale\n90009\tChimica\t6\tChimica Generale\n90020\tChimica\t6\tChimica Generale\n90006\tChimica\t6\tChimica Generale\n39\tChimica\t6\tChimica Generale\n30041\tChimica\t6\tChimica Generale\n29\tChimica\t6\tChimica Generale\n25\tChimica di base\t6\tChimica Generale\n90002\tChimica di base\t6\tChimica Generale\n30030\tChimica di base\t6\tChimica Generale\n60012\tChimica generale\t6\tChimica Generale\n1\tChimica generale\t6\tChimica Generale\n60007\tChimica generale\t6\tChimica Generale\n12\tChimica generale\t6\tChimica Generale\n30001\tChimica generale\t6\tChimica Generale\n60001\tChimica generale\t6\tChimica Generale\n7\tChimica generale\t6\tChimica Generale\n30012\tChimica generale\t6\tChimica Generale\n30007\tChimica generale\t6\tChimica Generale\n30045\tChimica generale ed inorganica\t6\tChimica Generale\n90017\tChimica generale ed inorganica\t6\tChimica Generale\n40\tChimica generale ed inorganica\t6\tChimica Generale\n60005\tChimica: materia, tecnologia, ambiente\t6\tChimica Generale\n30005\tChimica: materia, tecnologia, ambiente\t6\tChimica Generale\n5\tChimica: materia, tecnologia, ambiente\t6\tChimica Generale\n90015\tChimica: natura molecolare della materia\t6\tChimica Generale\n38\tChimica: natura molecolare della materia\t6\tChimica Generale\n30043\tChimica: natura molecolare della materia\t6\tChimica Generale\n30\tChimica: principi e reazioni\t6\tChimica Generale\n90007\tChimica: principi e reazioni\t6\tChimica Generale\n30035\tChimica: principi e reazioni\t6\tChimica Generale\n30006\tChimica: struttura, proprietà e trasformazioni della materia\t6\tChimica Generale\n60006\tChimica: struttura, proprietà e trasformazioni della materia\t6\tChimica Generale\n6\tChimica: struttura, proprietà e trasformazioni della materia\t6\tChimica Generale\n30046\tChimica: un approccio molecolare\t6\tChimica Generale\n90018\tChimica: un approccio molecolare\t6\tChimica Generale\n41\tChimica: un approccio molecolare\t6\tChimica Generale\n60013\tConoscere la Chimica\t6\tChimica Generale\n30013\tConoscere la Chimica\t6\tChimica Generale\n13\tConoscere la Chimica\t6\tChimica Generale\n90010\tElementi di Chimica\t6\tChimica Generale\n30038\tElementi di Chimica\t6\tChimica Generale\n33\tElementi di Chimica\t6\tChimica Generale\n60010\tFondamenti di Chimica\t6\tChimica Generale\n30031\tFondamenti di Chimica\t6\tChimica Generale\n30008\tFondamenti di Chimica\t6\tChimica Generale\n90003\tFondamenti di Chimica\t6\tChimica Generale\n30010\tFondamenti di Chimica\t6\tChimica Generale\n37\tFondamenti di Chimica\t6\tChimica Generale\n30042\tFondamenti di Chimica\t6\tChimica Generale\n30036\tFondamenti di Chimica\t6\tChimica Generale\n34\tFondamenti di Chimica\t6\tChimica Generale\n31\tFondamenti di Chimica\t6\tChimica Generale\n8\tFondamenti di Chimica\t6\tChimica Generale\n60008\tFondamenti di Chimica\t6\tChimica Generale\n10\tFondamenti di Chimica\t6\tChimica Generale\n90014\tFondamenti di Chimica\t6\tChimica Generale\n30029\tFondamenti di Chimica\t6\tChimica Generale\n26\tFondamenti di Chimica\t6\tChimica Generale\n30039\tFondamenti di Chimica\t6\tChimica Generale\n24\tFondamenti di Chimica\t6\tChimica Generale\n90001\tFondamenti di Chimica\t6\tChimica Generale\n90011\tFondamenti di Chimica\t6\tChimica Generale\n90008\tFondamenti di Chimica\t6\tChimica Generale\n2\tFondamenti di Chimica generale\t6\tChimica Generale\n30002\tFondamenti di Chimica generale\t6\tChimica Generale\n60002\tFondamenti di Chimica generale\t6\tChimica Generale\n9\tFondamenti di chimica\t6\tChimica Generale\n60009\tFondamenti di chimica\t6\tChimica Generale\n30009\tFondamenti di chimica\t6\tChimica Generale\n90005\tFondamenti di chimica\t6\tChimica Generale\n30033\tFondamenti di chimica\t6\tChimica Generale\n28\tFondamenti di chimica\t6\tChimica Generale\n30047\tIntroduzione alla Chimica\t6\tChimica Generale\n42\tIntroduzione alla Chimica\t6\tChimica Generale\n90019\tIntroduzione alla Chimica\t6\tChimica Generale\n11\tLa Chimica di base\t6\tChimica Generale\n60011\tLa Chimica di base\t6\tChimica Generale\n30011\tLa Chimica di base\t6\tChimica Generale\n60003\tPrincipi di Chimica\t6\tChimica Generale\n30003\tPrincipi di Chimica\t6\tChimica Generale\n3\tPrincipi di Chimica\t6\tChimica Generale\n30032\tViaggio nella chimica\t6\tChimica Generale\n27\tViaggio nella chimica\t6\tChimica Generale\n90004\tViaggio nella chimica\t6\tChimica Generale\n50\tChimica organica\t7\tChimica Organica\n30053\tChimica organica\t7\tChimica Organica\n90025\tChimica organica\t7\tChimica Organica\n90024\tChimica organica\t7\tChimica Organica\n60018\tChimica organica\t7\tChimica Organica\n90022\tChimica organica\t7\tChimica Organica\n90021\tChimica organica\t7\tChimica Organica\n30055\tChimica organica\t7\tChimica Organica\n30017\tChimica organica\t7\tChimica Organica\n18\tChimica organica\t7\tChimica Organica\n30018\tChimica organica\t7\tChimica Organica\n60017\tChimica organica\t7\tChimica Organica\n30050\tChimica organica\t7\tChimica Organica\n30049\tChimica organica\t7\tChimica Organica\n44\tChimica organica\t7\tChimica Organica\n45\tChimica organica\t7\tChimica Organica\n48\tChimica organica\t7\tChimica Organica\n17\tChimica organica\t7\tChimica Organica\n30051\tChimica organica essenziale\t7\tChimica Organica\n46\tChimica organica essenziale\t7\tChimica Organica\n90023\tChimica organica essenziale\t7\tChimica Organica\n30016\tChimica organica: approccio biologico\t7\tChimica Organica\n60016\tChimica organica: approccio biologico\t7\tChimica Organica\n16\tChimica organica: approccio biologico\t7\tChimica Organica\n49\tElementi di chimica organica\t7\tChimica Organica\n30054\tElementi di chimica organica\t7\tChimica Organica\n90026\tFondamenti di chimica organica\t7\tChimica Organica\n15\tFondamenti di chimica organica\t7\tChimica Organica\n52\tFondamenti di chimica organica\t7\tChimica Organica\n60014\tFondamenti di chimica organica\t7\tChimica Organica\n30015\tFondamenti di chimica organica\t7\tChimica Organica\n53\tFondamenti di chimica organica\t7\tChimica Organica\n90027\tFondamenti di chimica organica\t7\tChimica Organica\n51\tFondamenti di chimica organica\t7\tChimica Organica\n30057\tFondamenti di chimica organica\t7\tChimica Organica\n14\tFondamenti di chimica organica\t7\tChimica Organica\n30056\tFondamenti di chimica organica\t7\tChimica Organica\n30014\tFondamenti di chimica organica\t7\tChimica Organica\n60015\tFondamenti di chimica organica\t7\tChimica Organica\n90028\tFondamenti di chimica organica\t7\tChimica Organica\n30058\tFondamenti di chimica organica\t7\tChimica Organica\n30052\tIntroduzione alla chimica organica\t7\tChimica Organica\n47\tIntroduzione alla chimica organica\t7\tChimica Organica\n90029\tIntroduzione alla chimica organica\t7\tChimica Organica\n30081\tDalle cellule ai sistemi\t9\tIstologia\n64\tDalle cellule ai sistemi\t9\tIstologia\n90052\tDalle cellule ai sistemi\t9\tIstologia\n30083\tIstologia\t9\tIstologia\n30082\tIstologia\t9\tIstologia\n30028\tIstologia\t9\tIstologia\n65\tIstologia\t9\tIstologia\n23\tIstologia\t9\tIstologia\n60027\tIstologia\t9\tIstologia\n66\tIstologia\t9\tIstologia\n90053\tIstologia\t9\tIstologia\n90054\tIstologia\t9\tIstologia\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 
-type Provider = "openai" | "perplexity" | "claude";
+type Provider = "openai" | "perplexity" | "claude" | "dropbox";
 
 interface ApiKeyFormProps {
   provider: Provider;
@@ -145,7 +145,207 @@ function ApiKeyForm({ provider, label, description, placeholder }: ApiKeyFormPro
   );
 }
 
-// DropboxOAuthForm rimosso - Dropbox integration completamente eliminata
+function DropboxOAuthForm() {
+  const [appKey, setAppKey] = useState("");
+  const [appSecret, setAppSecret] = useState("");
+  const [showSecret, setShowSecret] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [showReconnect, setShowReconnect] = useState(false);
+  
+  const utils = trpc.useUtils();
+  const { data: tokenStatus } = trpc.dropbox.hasRefreshToken.useQuery();
+  const { data: config } = trpc.apiConfig.get.useQuery({ provider: "dropbox" });
+  
+  const getAuthUrlMutation = trpc.dropbox.getAuthUrl.useMutation();
+  const exchangeCodeMutation = trpc.dropbox.exchangeCode.useMutation({
+    onSuccess: (result) => {
+      toast.success(result.message);
+      utils.dropbox.hasRefreshToken.invalidate();
+      utils.apiConfig.get.invalidate({ provider: "dropbox" });
+      setIsConnecting(false);
+      setAppKey("");
+      setAppSecret("");
+    },
+    onError: (error) => {
+      toast.error(`Errore: ${error.message}`);
+      setIsConnecting(false);
+    },
+  });
+
+  // Check for OAuth callback code in URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get("code");
+    const state = urlParams.get("state");
+    
+    if (code && state) {
+      // Get stored credentials from sessionStorage
+      const storedAppKey = sessionStorage.getItem("dropbox_app_key");
+      const storedAppSecret = sessionStorage.getItem("dropbox_app_secret");
+      const storedRedirectUri = sessionStorage.getItem("dropbox_redirect_uri");
+      
+      if (storedAppKey && storedAppSecret && storedRedirectUri) {
+        setIsConnecting(true);
+        exchangeCodeMutation.mutate({
+          code,
+          appKey: storedAppKey,
+          appSecret: storedAppSecret,
+          redirectUri: storedRedirectUri,
+        });
+        
+        // Clean up
+        sessionStorage.removeItem("dropbox_app_key");
+        sessionStorage.removeItem("dropbox_app_secret");
+        sessionStorage.removeItem("dropbox_redirect_uri");
+        
+        // Remove code from URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, []);
+
+  const handleConnect = async () => {
+    if (!appKey.trim() || !appSecret.trim()) {
+      toast.error("Inserisci App Key e App Secret");
+      return;
+    }
+    
+    const redirectUri = `${window.location.origin}/impostazioni`;
+    
+    // Store credentials temporarily for the callback
+    sessionStorage.setItem("dropbox_app_key", appKey.trim());
+    sessionStorage.setItem("dropbox_app_secret", appSecret.trim());
+    sessionStorage.setItem("dropbox_redirect_uri", redirectUri);
+    
+    try {
+      const result = await getAuthUrlMutation.mutateAsync({
+        appKey: appKey.trim(),
+        redirectUri,
+      });
+      
+      // Redirect to Dropbox authorization
+      window.location.href = result.authUrl;
+    } catch (error) {
+      toast.error("Errore nella generazione dell'URL di autorizzazione");
+    }
+  };
+
+  const isConnected = tokenStatus?.hasRefreshToken;
+  const expiresAt = tokenStatus?.tokenExpiresAt;
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+              <Cloud className="h-5 w-5 text-blue-500" />
+            </div>
+            <div>
+              <CardTitle className="text-base">Dropbox (OAuth)</CardTitle>
+              <CardDescription>Connessione con rinnovo automatico del token</CardDescription>
+            </div>
+          </div>
+          {isConnected ? (
+            <div className="flex items-center gap-2 text-green-600">
+              <CheckCircle2 className="h-4 w-4" />
+              <span className="text-sm">Connesso (auto-refresh)</span>
+            </div>
+          ) : config ? (
+            <div className="flex items-center gap-2 text-yellow-600">
+              <RefreshCw className="h-4 w-4" />
+              <span className="text-sm">Token manuale (scade)</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <XCircle className="h-4 w-4" />
+              <span className="text-sm">Non connesso</span>
+            </div>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {isConnected && !showReconnect ? (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Dropbox è connesso con refresh token. Il token verrà rinnovato automaticamente.
+            </p>
+            {expiresAt && (
+              <p className="text-xs text-muted-foreground">
+                Token corrente scade: {new Date(expiresAt).toLocaleString("it-IT")}
+              </p>
+            )}
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowReconnect(true)}
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Riconnetti con nuove credenziali
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="bg-muted/50 rounded-lg p-4 text-sm space-y-2">
+              <p className="font-medium">Come ottenere le credenziali:</p>
+              <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+                <li>Vai su <a href="https://www.dropbox.com/developers/apps" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">Dropbox Developer Console <ExternalLink className="h-3 w-3" /></a></li>
+                <li>Seleziona la tua app (Zanichelli_Analisi_app)</li>
+                <li>Copia App Key e App Secret dalla pagina dell'app</li>
+              </ol>
+            </div>
+            
+            <div className="grid gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="dropbox-app-key">App Key</Label>
+                <Input
+                  id="dropbox-app-key"
+                  placeholder="es. 3zpd0gfm1dmbdkk"
+                  value={appKey}
+                  onChange={(e) => setAppKey(e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="dropbox-app-secret">App Secret</Label>
+                <div className="relative">
+                  <Input
+                    id="dropbox-app-secret"
+                    type={showSecret ? "text" : "password"}
+                    placeholder="es. 9aifzho66puv7qp"
+                    value={appSecret}
+                    onChange={(e) => setAppSecret(e.target.value)}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSecret(!showSecret)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <Button 
+              onClick={handleConnect}
+              disabled={!appKey.trim() || !appSecret.trim() || isConnecting || getAuthUrlMutation.isPending}
+              className="w-full"
+            >
+              {isConnecting || getAuthUrlMutation.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Cloud className="h-4 w-4 mr-2" />
+              )}
+              Connetti Dropbox
+            </Button>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 function LLMProviderToggle() {
   const utils = trpc.useUtils();
@@ -435,7 +635,7 @@ export default function Settings() {
               placeholder="sk-ant-..."
             />
             
-            {/* Dropbox OAuth - RIMOSSO */}
+            <DropboxOAuthForm />
           </div>
         </div>
 

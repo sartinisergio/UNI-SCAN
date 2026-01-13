@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `llmProvider` enum('manus','openai') DEFAULT 'manus' NOT NULL;

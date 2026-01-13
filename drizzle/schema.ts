@@ -127,7 +127,6 @@ export const analyses = mysqlTable("analyses", {
   universityName: varchar("universityName", { length: 255 }),
   professorName: varchar("professorName", { length: 255 }),
   degreeCourse: varchar("degreeCourse", { length: 255 }),
-  degreeClass: varchar("degreeClass", { length: 10 }), // Classe di laurea (es. L-13, L-27, LM-13)
   
   // Bibliografia strutturata
   primaryManualId: int("primaryManualId"), // Manuale principale (dal database)

@@ -1,5 +1,4 @@
 import { invokeLLMWithUserPreference } from "./llm";
-import { extractModules, getFrameworkFormat } from "./frameworkNormalizer";
 
 interface ManualIndex {
   capitoli?: Array<{
@@ -313,11 +312,6 @@ export async function generateManualEvaluation(
 ): Promise<EvaluationResult> {
   
   const isEconomics = isEconomicsSubject(subjectName);
-  // Estrai i moduli dalla nuova struttura framework multiclasse
-  // Supporta molteplici formati: modules (Chimica), moduli (generico), syllabus_modules (Istologia)
-  const frameworkModules = extractModules(framework as any);
-  const frameworkFormat = getFrameworkFormat(framework as any);
-  console.log(`[generateManualEvaluation] Framework format detected: ${frameworkFormat}, modules: ${frameworkModules.length}`);
   const economicsInstructions = isEconomics ? getEconomicsInstructions() : '';
   
   // Formato JSON per didacticApproach in base alla materia
@@ -340,7 +334,7 @@ INDICE DEL MANUALE:
 ${JSON.stringify(indexContent, null, 2)}
 
 FRAMEWORK DELLA MATERIA "${subjectName}" (moduli e argomenti richiesti):
-${JSON.stringify(frameworkModules, null, 2)}
+${JSON.stringify(framework.moduli, null, 2)}
 ${economicsInstructions}
 ISTRUZIONI GENERALI:
 1. Per ogni modulo del framework, valuta la copertura (0-100%) confrontando gli argomenti dell'indice con quelli richiesti

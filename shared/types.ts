@@ -23,9 +23,6 @@ export const SUBJECTS = [
   { code: "chimica_organica", name: "Chimica Organica" },
   { code: "economia_politica", name: "Economia Politica" },
   { code: "istologia", name: "Istologia" },
-  { code: "macroeconomia", name: "Macroeconomia" },
-  { code: "microeconomia", name: "Microeconomia" },
-  { code: "matematica_per_biologia", name: "Matematica per Biologia" },
 ] as const;
 
 export type SubjectCode = (typeof SUBJECTS)[number]["code"];

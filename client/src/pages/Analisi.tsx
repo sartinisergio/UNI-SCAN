@@ -200,7 +200,6 @@ export default function Analisi() {
   const [universityName, setUniversityName] = useState("");
   const [professorName, setProfessorName] = useState("");
   const [degreeCourse, setDegreeCourse] = useState("");
-  const [degreeClass, setDegreeClass] = useState<string>("");
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [analysisId, setAnalysisId] = useState<number | null>(null);
   const [processingPhase, setProcessingPhase] = useState(0);
@@ -212,23 +211,6 @@ export default function Analisi() {
   const [alternativeManuals, setAlternativeManuals] = useState<Array<{manualId: number | null; custom: {title: string; author: string; publisher: string} | null; showCustom: boolean}>>([]);
   
   const { data: subjects } = trpc.subjects.list.useQuery();
-  
-  // Query per ottenere il framework della materia selezionata
-  const { data: activeFramework } = trpc.frameworks.getActive.useQuery(
-    { subjectId: selectedSubjectId! },
-    { enabled: !!selectedSubjectId }
-  );
-  
-  // Estrarre le classi di laurea dal framework
-  const degreeClasses = (activeFramework?.content as any)?.framework?.classes_analyzed || [];
-  
-  // Formattare i nomi delle classi (es. L-13_Biologia -> L-13 Biologia)
-  const formattedDegreeClasses = degreeClasses.map((dc: string) => {
-    const parts = dc.split('_');
-    const code = parts[0];
-    const name = parts.slice(1).join(' ');
-    return `${code} ${name}`;
-  });
   
   // Query per ottenere i manuali della materia selezionata
   const { data: manualsForSubject } = trpc.manuals.listBySubject.useQuery(
@@ -300,7 +282,6 @@ export default function Analisi() {
       universityName: universityName.trim() || undefined,
       professorName: professorName.trim() || undefined,
       degreeCourse: degreeCourse.trim() || undefined,
-      degreeClass: degreeClass.trim() || undefined,
       primaryManualId: primaryManualId || undefined,
       primaryManualCustom: primaryManualCustom && primaryManualCustom.title && primaryManualCustom.author 
         ? primaryManualCustom 
@@ -333,7 +314,6 @@ export default function Analisi() {
     setUniversityName("");
     setProfessorName("");
     setDegreeCourse("");
-    setDegreeClass("");
     setPrimaryManualId(null);
     setPrimaryManualCustom(null);
     setShowPrimaryCustom(false);
@@ -432,28 +412,6 @@ export default function Analisi() {
                   </SelectContent>
                 </Select>
               </div>
-
-              {/* Degree Class Selection */}
-              {degreeClasses && degreeClasses.length > 0 && (
-                <div className="space-y-2">
-                  <Label htmlFor="degreeClass">Classe di Laurea *</Label>
-                  <Select value={degreeClass} onValueChange={setDegreeClass}>
-                    <SelectTrigger id="degreeClass">
-                      <SelectValue placeholder="Seleziona classe di laurea..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(formattedDegreeClasses as string[]).map((dc: string) => {
-                        const code = dc.split(' ')[0];
-                        return (
-                          <SelectItem key={code} value={code}>
-                            {dc}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
 
               {/* Program Info */}
               <div className="grid gap-4 md:grid-cols-2">

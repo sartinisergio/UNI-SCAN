@@ -16,7 +16,6 @@ export interface AnalysisInput {
   courseName?: string;
   professorName?: string;
   degreeCourse?: string;
-  degreeClass?: string; // Classe di laurea per dati specifici dal framework
   primaryManual?: {
     id: number | null;
     title: string;
@@ -201,7 +200,7 @@ export interface FullAnalysisResult {
 }
 
 // Prompt per Fase 1: Analisi Contestuale
-function getPhase1Prompt(programText: string, degreeClass?: string, framework?: any): string {
+function getPhase1Prompt(programText: string): string {
   return `# RUOLO
 Sei un esperto di didattica universitaria italiana con profonda conoscenza del sistema di autonomia didattica e delle diverse scuole di pensiero economico.
 
@@ -219,9 +218,6 @@ Analizza il seguente programma di corso universitario ed estrai il **profilo ped
 2. Priorità Pedagogiche
 3. Target di Studenti
 4. Contesto Istituzionale
-
-# FRAMEWORK MULTICLASSE
-${degreeClass && framework ? `Classe di Laurea: ${degreeClass}\nFramework disponibile per questa classe: ${framework.classes_analyzed?.includes(degreeClass) ? 'Sì' : 'No'}` : 'Nessun framework specificato'}
 
 # INPUT - PROGRAMMA DEL CORSO
 ${programText}
@@ -337,7 +333,7 @@ interface BibliographyData {
   }>;
 }
 
-function getPhase2Prompt(programText: string, framework: any, phase1Result: Phase1Result, subjectName: string, bibliography?: BibliographyData, degreeClass?: string): string {
+function getPhase2Prompt(programText: string, framework: any, phase1Result: Phase1Result, subjectName: string, bibliography?: BibliographyData): string {
   // Costruisci la sezione bibliografia se fornita
   let bibliographySection = "";
   if (bibliography?.primaryManual || (bibliography?.alternativeManuals && bibliography.alternativeManuals.length > 0)) {
@@ -374,9 +370,6 @@ ${JSON.stringify(phase1Result, null, 2)}
 
 # FRAMEWORK DI VALUTAZIONE
 ${JSON.stringify(framework, null, 2)}
-
-# CLASSE DI LAUREA
-${degreeClass ? `Classe: ${degreeClass}` : 'Non specificata'}
 ${bibliographySection}
 # PROGRAMMA DEL CORSO
 ${programText}
@@ -472,8 +465,7 @@ function getPhase3Prompt(
   phase2Result: Phase2Result, 
   zanichelliManuals: any[], 
   subjectName: string,
-  bibliography?: BibliographyData,
-  degreeClass?: string
+  bibliography?: BibliographyData
 ): string {
   // Costruisci la sezione bibliografia se fornita
   let bibliographySection = "";
@@ -521,9 +513,6 @@ ${JSON.stringify(phase2Result, null, 2)}
 
 ## Catalogo Zanichelli per ${subjectName}
 ${JSON.stringify(zanichelliManuals, null, 2)}
-
-## Classe di Laurea
-${degreeClass ? `Classe: ${degreeClass}` : 'Non specificata'}
 ${bibliographySection}
 
 # TASK
@@ -557,14 +546,7 @@ I gap devono essere classificati in 4 tipologie:
 - Enfatizza il valore aggiunto per studenti e docente
 - Includi punti di attenzione per il promotore
 - Se non ci sono manuali Zanichelli disponibili, indica "nessun manuale disponibile"
-- IMPORTANTE: La piattaforma digitale di Zanichelli si chiama MyZanichelli (NON MyLab che è di Pearson). Quando parli di risorse digitali Zanichelli, usa sempre MyZanichelli o piattaforma digitale Zanichelli
-${degreeClass ? `- CLASSE DI LAUREA: ${degreeClass} - Adatta le raccomandazioni in base ai requisiti specifici di questa classe` : ''}
-- EMAIL DI CONTATTO: Genera un'email personalizzata che il promotore possa inviare al docente. L'email deve:
-  * Aprirsi con un riferimento specifico al programma del corso
-  * Evidenziare come il manuale Zanichelli risolve i gap identificati
-  * Includere un'offerta concreta (es. saggio di lettura, accesso MyZanichelli)
-  * Chiudersi con una call-to-action chiara
-  * Essere professionale ma cordiale, max 500 parole
+- IMPORTANTE: La piattaforma digitale di Zanichelli si chiama "MyZanichelli" (NON "MyLab" che è di Pearson). Quando parli di risorse digitali Zanichelli, usa sempre "MyZanichelli" o "piattaforma digitale Zanichelli"
 
 # FORMATO OUTPUT
 Rispondi SOLO con un JSON valido, senza markdown o altro testo:
@@ -644,12 +626,7 @@ Rispondi SOLO con un JSON valido, senza markdown o altro testo:
     },
     "punti_attenzione": ["string"]
   },
-  "post_it": "string (sintesi testuale pronta per il promotore, max 200 parole)",
-  "email_contatto": {
-    "oggetto": "string (oggetto email accattivante, max 80 caratteri)",
-    "corpo": "string (corpo email professionale e persuasivo, max 500 parole, in italiano)",
-    "firma": "string (firma con nome promotore e dati contatto)"
-  }
+  "post_it": "string (sintesi testuale pronta per il promotore, max 200 parole)"
 }`;
 }
 
@@ -710,7 +687,7 @@ export async function runFullAnalysis(input: AnalysisInput): Promise<FullAnalysi
   
   // FASE 1: Analisi Contestuale
   console.log("[Analysis] Phase 1: Contextual Analysis");
-  const phase1Prompt = getPhase1Prompt(programText, input.degreeClass, framework.content);
+  const phase1Prompt = getPhase1Prompt(programText);
   const phase1Response = await invokeLLMWithUserPreference(input.userId, {
     messages: [
       { role: "system", content: "Sei un assistente esperto di didattica universitaria. Rispondi SOLO con JSON valido." },
@@ -728,7 +705,7 @@ export async function runFullAnalysis(input: AnalysisInput): Promise<FullAnalysi
     primaryManual: input.primaryManual,
     alternativeManuals: input.alternativeManuals,
   };
-  const phase2Prompt = getPhase2Prompt(input.programText, framework.content, phase1Result, subject.name, bibliographyData, input.degreeClass);
+  const phase2Prompt = getPhase2Prompt(input.programText, framework.content, phase1Result, subject.name, bibliographyData);
   const phase2Response = await invokeLLMWithUserPreference(input.userId, {
     messages: [
       { role: "system", content: `Sei un esperto di ${subject.name}. Rispondi SOLO con JSON valido.` },
@@ -742,7 +719,7 @@ export async function runFullAnalysis(input: AnalysisInput): Promise<FullAnalysi
   
   // FASE 3: Sintesi Commerciale
   console.log("[Analysis] Phase 3: Commercial Synthesis");
-  const phase3Prompt = getPhase3Prompt(phase1Result, phase2Result, zanichelliManuals, subject.name, bibliographyData, input.degreeClass);
+  const phase3Prompt = getPhase3Prompt(phase1Result, phase2Result, zanichelliManuals, subject.name, bibliographyData);
   const phase3Response = await invokeLLMWithUserPreference(input.userId, {
     messages: [
       { role: "system", content: "Sei un consulente commerciale per Zanichelli. Rispondi SOLO con JSON valido." },

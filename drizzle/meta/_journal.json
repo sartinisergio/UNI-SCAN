@@ -43,13 +43,6 @@
       "when": 1765365862192,
       "tag": "0005_third_ego",
       "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "5",
-      "when": 1767947042308,
-      "tag": "0006_talented_vapor",
-      "breakpoints": true
     }
   ]
 }

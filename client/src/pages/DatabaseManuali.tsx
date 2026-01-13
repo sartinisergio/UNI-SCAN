@@ -79,21 +79,22 @@ export default function DatabaseManuali() {
     }
   });
   
-  const regenerateAllEvaluationsMutation = trpc.manuals.regenerateAllEvaluations.useMutation({
+  const reimportFromDropboxMutation = trpc.manuals.reimportIndexFromDropbox.useMutation({
     onSuccess: (data) => {
-      toast.success(`Rigenerazione completata: ${data.successCount} valutazioni generate${data.errorCount > 0 ? `, ${data.errorCount} errori` : ""}`);
-      if (data.errors.length > 0) {
-        data.errors.forEach(err => toast.error(err));
-      }
-      utils.evaluations.listBySubject.invalidate();
+      toast.success(`Indice reimportato da Dropbox: ${data.chaptersCount} capitoli`);
       refetchManuals();
+      // Update the textarea with the new content
+      if (uploadManualId) {
+        const manual = manuals?.find(m => m.id === uploadManualId);
+        if (manual?.indexContent) {
+          setIndexJson(JSON.stringify(manual.indexContent, null, 2));
+        }
+      }
     },
     onError: (error) => {
       toast.error(`Errore: ${error.message}`);
     }
   });
-  
-  // reimportFromDropboxMutation rimosso - Dropbox integration completamente eliminata
 
   const toggleCompare = (manualId: number) => {
     if (selectedForCompare.includes(manualId)) {
@@ -177,40 +178,17 @@ export default function DatabaseManuali() {
               </div>
               
               {selectedSubjectId && manuals && manuals.length > 1 && (
-                <>
-                  <Button 
-                    variant={compareMode ? "default" : "outline"}
-                    onClick={() => {
-                      setCompareMode(!compareMode);
-                      setSelectedForCompare([]);
-                      setSelectedManualId(null);
-                    }}
-                  >
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    {compareMode ? "Esci Confronto" : "Confronta Manuali"}
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => {
-                      if (window.confirm("Rigenerare tutte le valutazioni per questa materia? Questo potrebbe richiedere alcuni minuti.")) {
-                        regenerateAllEvaluationsMutation.mutate({ subjectId: selectedSubjectId });
-                      }
-                    }}
-                    disabled={regenerateAllEvaluationsMutation.isPending}
-                  >
-                    {regenerateAllEvaluationsMutation.isPending ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Rigenerazione in corso...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="h-4 w-4 mr-2" />
-                        Rigenera Tutte le Valutazioni
-                      </>
-                    )}
-                  </Button>
-                </>
+                <Button 
+                  variant={compareMode ? "default" : "outline"}
+                  onClick={() => {
+                    setCompareMode(!compareMode);
+                    setSelectedForCompare([]);
+                    setSelectedManualId(null);
+                  }}
+                >
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  {compareMode ? "Esci Confronto" : "Confronta Manuali"}
+                </Button>
               )}
             </div>
           </CardContent>
@@ -414,8 +392,29 @@ export default function DatabaseManuali() {
           </DialogHeader>
           
           {/* Action buttons at top */}
-          <div className="flex gap-2 flex-shrink-0">
-            {/* Pulsante Importa da Dropbox - RIMOSSO */}
+              <div className="flex gap-2 flex-shrink-0">
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (uploadManualId) {
+                  reimportFromDropboxMutation.mutate({ id: uploadManualId });
+                }
+              }}
+              disabled={reimportFromDropboxMutation.isPending}
+            >
+              {reimportFromDropboxMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Importazione...
+                </>
+              ) : (
+                <>
+                  <CloudDownload className="h-4 w-4 mr-2" />
+                  Importa da Dropbox
+                </>
+              )}
+            </Button>
           </div>
           
           {/* Scrollable content area */}

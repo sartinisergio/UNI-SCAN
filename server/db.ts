@@ -242,12 +242,6 @@ export async function updateSubject(id: number, data: Partial<InsertSubject>): P
   await db.update(subjects).set(data).where(eq(subjects.id, id));
 }
 
-export async function deleteSubject(id: number): Promise<void> {
-  const db = await getDb();
-  if (!db) return;
-  await db.delete(subjects).where(eq(subjects.id, id));
-}
-
 // ============ FRAMEWORKS ============
 export async function getFrameworksBySubject(subjectId: number): Promise<Framework[]> {
   const db = await getDb();
@@ -277,9 +271,7 @@ export async function createFramework(framework: InsertFramework): Promise<numbe
 export async function updateFramework(id: number, data: Partial<InsertFramework>): Promise<void> {
   const db = await getDb();
   if (!db) return;
-  // Explicitly set updatedAt to ensure it's updated
-  const updateData = { ...data, updatedAt: new Date() };
-  await db.update(frameworks).set(updateData).where(eq(frameworks.id, id));
+  await db.update(frameworks).set(data).where(eq(frameworks.id, id));
 }
 
 export async function getFrameworkById(id: number): Promise<Framework | undefined> {
@@ -430,12 +422,4 @@ export async function upsertPromoterProfile(profile: InsertPromoterProfile): Pro
   } else {
     await db.insert(promoterProfiles).values(profile);
   }
-}
-
-
-// Deactivate all frameworks (for migration)
-export async function deactivateAllFrameworks(): Promise<void> {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  await db.update(frameworks).set({ isActive: false, updatedAt: new Date() });
 }

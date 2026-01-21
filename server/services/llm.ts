@@ -201,13 +201,14 @@ export async function invokeLLMWithUserPreference(
   const user = await db.getUserById(userId);
   const provider = user?.llmProvider || "manus";
   
-  if (provider === "openai") {
-    // Get user's OpenAI API key
-    const config = await db.getApiConfig(userId, "openai");
+  if (provider === "openai" || provider === "perplexity" || provider === "claude") {
+    // Get user's API key for the selected provider
+    const config = await db.getApiConfig(userId, provider as any);
     if (!config?.apiKey) {
-      throw new Error("Chiave API OpenAI non configurata. Vai nelle Impostazioni per configurarla.");
+      const providerName = provider.charAt(0).toUpperCase() + provider.slice(1);
+      throw new Error(`Chiave API ${providerName} non configurata. Vai nelle Impostazioni per configurarla.`);
     }
-    return invokeLLMWithCustomKey("openai", config.apiKey, options);
+    return invokeLLMWithCustomKey(provider as any, config.apiKey, options);
   }
   
   // Default: use Manus built-in API

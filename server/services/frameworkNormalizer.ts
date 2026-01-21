@@ -13,9 +13,11 @@
  * Ogni modulo deve avere:
  * - id: numero identificativo
  * - nome: nome del modulo
- * - argomenti: array di argomenti/concetti
+ * - argomenti: array di argomenti/concetti (estratti con priorita da key_concepts, poi altri campi)
  * 
  * Opzionali:
+ * - key_concepts: array di concetti chiave estratti dall'LLM (priorita massima)
+ * - core_contents: descrizione testuale del modulo (fallback se key_concepts non disponibili)
  * - coverage_percentage: percentuale di copertura
  * - class_data: dati per classe di laurea
  * - matched_concepts: concetti mappati
@@ -58,6 +60,11 @@ export function normalizeFramework(framework: any): NormalizedFramework {
     modules = framework.moduli;
   } else if (Array.isArray(framework.syllabus_modules)) {
     modules = framework.syllabus_modules;
+  } else if (framework.content && framework.content.content && Array.isArray(framework.content.content.syllabus_modules)) {
+    // Support nested structure: framework.content.content.syllabus_modules
+    modules = framework.content.content.syllabus_modules;
+  } else if (framework.content && Array.isArray(framework.content.syllabus_modules)) {
+    modules = framework.content.syllabus_modules;
   } else if (Array.isArray(framework.chapters)) {
     modules = framework.chapters;
   } else if (Array.isArray(framework.capitoli)) {
@@ -83,7 +90,10 @@ export function normalizeFramework(framework: any): NormalizedFramework {
     // Estrai gli argomenti da vari campi possibili
     let argomenti: string[] = [];
     
-    if (Array.isArray(module.argomenti)) {
+    // Priorità 1: key_concepts (estratti dall'LLM dai core_contents)
+    if (Array.isArray(module.key_concepts)) {
+      argomenti = module.key_concepts;
+    } else if (Array.isArray(module.argomenti)) {
       argomenti = module.argomenti;
     } else if (Array.isArray(module.topics)) {
       argomenti = module.topics;
@@ -96,6 +106,10 @@ export function normalizeFramework(framework: any): NormalizedFramework {
       argomenti = module.matched_concepts
         .map((c: any) => c.name || c.concept || c.topic || '')
         .filter((name: string) => name.length > 0);
+    } else if (module.core_contents && typeof module.core_contents === 'string') {
+      // Se c'è un campo core_contents (descrizione testuale), estrailo come singolo elemento
+      // L'LLM estrarrà i concetti chiave durante la valutazione
+      argomenti = [module.core_contents];
     } else if (module.content && typeof module.content === 'string') {
       // Se c'è un campo content stringa, usalo
       argomenti = [module.content];

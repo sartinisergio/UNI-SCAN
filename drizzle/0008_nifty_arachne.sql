@@ -1,0 +1,1 @@
+ALTER TABLE `users` MODIFY COLUMN `llmProvider` enum('manus','openai','perplexity','claude') NOT NULL DEFAULT 'manus';

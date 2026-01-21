@@ -1,0 +1,1 @@
+ALTER TABLE `analyses` ADD `degreeClass` varchar(10);

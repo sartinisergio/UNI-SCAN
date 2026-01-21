@@ -1,4 +1,31 @@
-# UNI-SCAN - Project TODO
+# UNI-SCAN - Project TODO & Status
+
+## 🎯 CURRENT STATUS (21/01/2026)
+**Version**: 8a6b59cd
+**Status**: Two-phase evaluation system WORKING ✅
+**Last Tested**: Valutazione "Atkins - Principi di Chimica" (score: 92/100 - Eccellente)
+
+---
+
+## 🏗️ ARCHITECTURE: Two-Phase Evaluation System
+
+### **Fase 1: Analisi Moduli**
+- Valuta copertura manuale vs 14 moduli framework pedagogico
+- Assegna percentuale per modulo (65-100%)
+- Moduli: Struttura atomo, Legame chimico, Stechiometria, Stati materia, Termochimica, Termodinamica, Cinetica, Equilibrio, Soluzioni, Acidi/basi, Elettrochimica, Nucleare, Inorganica descrittiva, Coordinamento
+
+### **Fase 2: Compatibilità Classi di Laurea**
+- Valuta manuale per 11 classi di laurea (L-2, L-7, L-8, L-9, L-13, L-25, L-26, L-27, L-29, L-32, L-34, LM-13)
+- Per ogni classe: reasoning, moduli critici, gap, raccomandazioni
+- Verdetti: Ideale (verde), Buono (blu), Insufficiente (rosso)
+
+### **Implementazione**
+- File: `server/services/improvedManualEvaluator.ts`
+- Metodo: `evaluateManualTwoPhase(manualId, frameworkId)`
+- Output: JSON strutturato + HTML formattato
+- Score finale: 0-100 (Eccellente 85+, Buono 70-84, Sufficiente 55-69, Sconsigliato <55)
+
+---
 
 ## Fase 1: Setup Progetto
 - [x] Schema database (users, api_configs, analyses, frameworks, manuals)
@@ -53,6 +80,14 @@
 - [ ] Generazione email personalizzata (GPT-4, temp=0)
 - [ ] Varianti oggetto email
 - [ ] Visualizzazione email con copia-incolla
+
+## ✅ COMPLETED: Two-Phase Evaluation System
+- [x] Implementato sistema doppia valutazione in `improvedManualEvaluator.ts`
+- [x] Fase 1: Analisi moduli vs framework (14 moduli)
+- [x] Fase 2: Compatibilità per classi di laurea (11 classi)
+- [x] Generazione verdetti per modulo e classe di laurea
+- [x] Test su "Atkins - Principi di Chimica" (score: 92/100)
+- [x] Esportazione HTML formattato
 
 ## Fase 8: Testing e Refinement
 - [ ] Test unitari backend (Vitest)
@@ -263,3 +298,317 @@
 - [x] Modificare servizi LLM per leggere preferenza e usare provider corretto (invokeLLMWithUserPreference)
 - [x] Aggiungere switch nella UI Impostazioni (componente LLMProviderToggle)
 - [x] Mostrare stato connessione per entrambi i provider
+
+## Bug Fix: Errore ricorrente "Unexpected token '<', "<!doctype"..." (18/12/2025)
+- [x] Investigare causa dell'errore nella pagina /gestione-dati
+- [x] Identificare quale query tRPC sta fallendo (dropbox.getFolderStructure)
+- [x] Correggere il problema alla radice (reso lazy il caricamento Dropbox)
+- [x] Testare la soluzione - pagina ora si carica correttamente
+
+## Bug Fix: Errore ricorrente si ripresenta (26/12/2025)
+- [x] L'errore "Unexpected token '<', "<!doctype"..." si ripresenta nonostante il fix precedente (causato da conflitto porte)
+- [x] Implementare soluzione più robusta con timeout sul server (30s timeout su getFolderStructure)
+- [x] Aggiungere error boundary e retry logic nel frontend (gestione errori migliorata con UI dedicata)
+
+## Bug Fix: Errore importazione framework - materie non trovate (30/12/2025)
+- [x] Errore durante importazione framework da Dropbox per: Analisi_matematica_1, Analisi_matematica_2, Fisica_Generale_1, Fisica_Generale_2, Matematica_Bioscienze
+- [x] Verificare se le materie esistono nel database con nomi diversi (trovate discrepanze nei nomi)
+- [x] Aggiungere le materie mancanti (Macroeconomia, Microeconomia, Matematica per Biologia) e migliorare il matching con tabella di mapping
+
+## Bug Fix: Errore importazione con prefisso framework_ (30/12/2025)
+- [x] I file framework hanno prefisso "framework_" che non viene gestito dal matching
+- [x] Aggiornare logica per rimuovere il prefisso prima del matching (aggiunto .replace(/^framework_/i, "") in dropbox.ts)
+- [x] Estesa tabella di mapping per includere tutti i nomi diretti
+
+## Bug: Framework non visualizzabili dopo importazione (30/12/2025)
+- [x] I framework importati mostrano data 8 dicembre invece del 30 dicembre (risolto: updatedAt ora viene aggiornato esplicitamente)
+- [x] La matita di modifica è presente ma i framework non sono visualizzabili (risolto: aggiunto pulsante Visualizza e funzionalità Modifica)
+- [x] Verificare se l'aggiornamento del database avviene correttamente (risolto: updateFramework ora imposta updatedAt esplicitamente)
+- [x] Verificare se il problema è nella query di lettura o nell'update (risolto: UI ora mostra "Aggiornato il" quando updatedAt != createdAt)
+
+## Bug: Importazione Dropbox non funziona (30/12/2025)
+- [ ] Il pulsante "Importa Framework" non risponde o non completa l'operazione
+- [ ] Verificare se ci sono errori nella console o nel server
+- [ ] Testare la connessione Dropbox e le API
+
+## ⏳ NEXT PHASE: UI Integration of Two-Phase Evaluation
+- [ ] Visualizzare dettagli valutazione nel modal quando clicchi "Valutaz."
+- [ ] Mostrare breakdown per moduli (coverage %)
+- [ ] Mostrare compatibilità per classi di laurea
+- [ ] Aggiungere filtri per classe di laurea nel Database Manuali
+- [ ] Testare rigenerazione valutazione per manuale diverso
+
+## Bug Fix: Framework realmente troncati durante importazione (30/12/2025)
+- [x] I framework importati sono incompleti (TUTTI i framework sono troncati)
+- [x] VERIFICATO: i file su Dropbox sono completi e corretti (iniziano e finiscono con {})
+- [ ] ERRORE PRECEDENTE: il contenuto nel database NON è completo come pensato
+- [ ] Il framework inizia da "alignment_method" invece che dall'inizio
+- [ ] Le prime 430+ righe sono state tagliate durante l'importazione
+- [ ] Identificare dove avviene il troncamento nel codice di importazione
+- [ ] Correggere il bug e reimportare i framework
+
+## Bug: Errore importazione framework_Matematica_Bio.json (02/01/2026)
+- [x] Il file framework_Matematica_Bio.json non trova la materia corrispondente
+- [x] Verificare se "Matematica per Biologia" esiste nel database (esiste con code matematica_per_biologia)
+- [x] Correggere il mapping o aggiungere la materia (aggiunto matematica_per_biologia, macroeconomia, istologia al mapping)
+- [ ] ERRORE PERSISTE: aggiungere logging per vedere quale codice viene estratto dal nome file
+- [ ] Verificare se il problema è nella normalizzazione del nome o nel matching
+
+## Bug: Timeout Dropbox e pulsante Riprova non funziona (03/01/2026)
+- [x] La query getFolderStructure va in timeout dopo 30s (RISOLTO: rimossa la query)
+- [x] Il pulsante "Riprova" non ricarica i dati (RISOLTO: rimossa la necessità di riprova)
+- [x] Aumentare il timeout o ottimizzare la query (SOLUZIONE: rimossa la visualizzazione della struttura)
+- [x] Correggere il pulsante Riprova per fare refetch (RISOLTO: interfaccia semplificata)
+
+## Bug: Server crash durante importazione framework (07/01/2026)
+- [ ] Il server crasha quando clicchi su "Importa Framework"
+- [ ] Errore: "Unexpected token '<', "<!doctype"..." - il server restituisce HTML di errore
+- [ ] Investigare i log del server per trovare l'errore
+- [ ] Correggere il bug nel codice di importazione
+
+
+## Migrazione da Dropbox a Database (COMPLETATA - 08/01/2026)
+- [x] FASE 1: Verificare schema database
+- [x] FASE 2: Aggiungere CRUD completo per framework e manuali
+- [x] FASE 3: Saltata - Dropbox rimosso, caricamento via UI
+- [x] FASE 4: Rimuovere Dropbox completamente dal codice
+- [x] FASE 5: Verificare stabilita del server (0 errori TS)
+- [x] FASE 6: Creare checkpoint della migrazione
+
+## Nuovo Framework Multiclasse (In Elaborazione)
+- [x] Analizzato framework Chimica Generale - Multiclasse (10 classi di laurea)
+- [x] Confermato compatibilità con UNI-SCAN
+- [x] Definito criterio per popolare select classi di laurea (dinamico dal framework)
+- [ ] Aggiungere campo degreeClass alle analisi (dopo migrazione Dropbox)
+- [ ] Aggiornare prompt GPT-4 per usare dati per-class dal nuovo framework
+- [ ] Aggiornare UI per mostrare analisi per-class
+- [ ] Caricare framework multiclasse Chimica Generale quando pronto
+- [ ] Caricare framework multiclasse Istologia quando pronto
+- [ ] Caricare framework multiclasse per altre materie quando pronti
+
+## Conversione PDF → Testo (Nuova Funzionalità)
+- [ ] Installare libreria pdfjs-dist per conversione PDF affidabile
+- [ ] Creare servizio pdfToText nel backend
+- [ ] Integrare conversione nel flusso di caricamento programma
+- [ ] Testare con PDF reali per verificare qualità estrazione testo
+
+
+## Prossimi Step (Priorità - 08/01/2026)
+
+### Step 1: Caricare Framework Multiclasse
+- [ ] Caricare framework Chimica Generale multiclasse via UI
+- [ ] Caricare framework Istologia multiclasse via UI
+- [ ] Verificare che i dati siano stati salvati correttamente nel database
+
+### Step 2: Implementare Upload File JSON
+- [ ] Aggiungere input file per upload JSON nei framework
+- [ ] Aggiungere input file per upload JSON nei manuali
+- [ ] Validare il JSON caricato
+- [ ] Testare upload con file JSON reali
+
+### Step 3: Aggiungere Campo Classe di Laurea
+- [ ] Aggiungere campo degreeClass alla tabella evaluations
+- [ ] Aggiungere select classe di laurea nel form di Analisi Situazionale
+- [ ] Popolare dinamicamente dal framework selezionato
+- [ ] Aggiornare prompt GPT-4 per usare la classe di laurea
+- [ ] Testare con un'analisi completa
+
+
+## Migrazione da Dropbox a Database (COMPLETATA - 08/01/2026)
+- [x] FASE 1: Verificare schema database
+- [x] FASE 2: Aggiungere CRUD completo per framework e manuali
+- [x] FASE 3: Saltata - Dropbox rimosso, caricamento via UI
+- [x] FASE 4: Rimuovere Dropbox completamente dal codice
+- [x] FASE 5: Verificare stabilità del server (0 errori TS)
+- [x] FASE 6: Creare checkpoint della migrazione
+
+## Tre Step Successivi (COMPLETATI - 08/01/2026)
+- [x] FASE 1: Caricare i framework multiclasse nel database (Chimica Generale e Istologia)
+- [x] FASE 2: Implementare upload file JSON per framework e manuali
+- [x] FASE 3: Aggiungere campo classe di laurea nel form di Analisi Situazionale
+- [x] FASE 4: Testare e validare i tre step
+- [ ] FASE 5: Creare checkpoint finale
+
+## Nuovo Framework Multiclasse (In Elaborazione)
+- [x] Analizzato framework Chimica Generale - Multiclasse (10 classi di laurea)
+- [x] Confermato compatibilità con UNI-SCAN
+- [x] Definito criterio per popolare select classi di laurea (dinamico dal framework)
+- [x] Caricato framework multiclasse Chimica Generale nel database
+- [x] Caricato framework multiclasse Istologia nel database
+- [x] Aggiunto campo degreeClass alle analisi
+- [x] Implementato select dinamico per classe di laurea nel form
+- [x] Estratte classi dal campo framework.classes_analyzed
+- [x] Puliti i nomi delle classi (L-13_Biologia → L-13)
+- [x] Spostato select classe di laurea subito dopo select materia
+- [ ] Aggiornare prompt GPT-4 per usare dati per-class dal nuovo framework
+- [ ] Aggiornare UI per mostrare analisi per-class
+- [ ] Caricare framework multiclasse per altre materie quando pronti
+
+## Conversione PDF → Testo (Nuova Funzionalità)
+- [ ] Installare libreria pdfjs-dist per conversione PDF affidabile
+- [ ] Creare servizio pdfToText nel backend
+- [ ] Integrare conversione nel flusso di caricamento programma
+- [ ] Testare con PDF reali per verificare qualità estrazione testo
+
+
+## Fix Valutazione Istologia - Struttura Framework Variabile (09/01/2026)
+- [x] Fix: Framework Istologia usa "syllabus_modules" invece di "modules"
+- [x] Aggiornare manualEvaluator.ts per cercare syllabus_modules oltre a modules/moduli
+- [ ] Testare valutazione Istologia con nuovo codice
+- [x] Creare sistema robusto per normalizzare strutture framework diverse (frameworkNormalizer.ts)
+- [x] Documentare formati supportati per framework futuri (19 test passati)
+
+## Implementazione Conversione PDF → Testo (09/01/2026)
+- [ ] Aggiungere libreria pdfjs-dist per parsing PDF
+- [ ] Creare servizio pdfParser.ts per estrazione testo da PDF
+- [ ] Implementare troncamento automatico per PDF molto lunghi
+- [ ] Aggiornare form Analisi Situazionale per upload PDF programmi
+- [ ] Testare parsing PDF con programmi reali
+
+## Aggiornamento Prompt GPT-4 per Classe di Laurea (09/01/2026)
+- [x] Fase 1: Passare degreeClass al prompt
+- [x] Fase 1: Aggiunta sezione FRAMEWORK MULTICLASSE al prompt
+- [x] Fase 2: Usare moduli specifici della classe nel prompt
+- [x] Fase 2: Aggiunta sezione CLASSE DI LAUREA al prompt
+- [x] Fase 2: Identificare gap specifici della classe
+- [x] Fase 3: Generare raccomandazioni specifiche della classe
+- [x] Fase 3: Aggiunta sezione CLASSE DI LAUREA al prompt Fase 3
+- [x] Testare analisi completa con Istologia + classe di laurea
+
+## Generazione Email di Contatto (09/01/2026)
+- [x] Aggiungere sezione email nel prompt della Fase 3
+- [x] Generare email personalizzata con vantaggi manuale per classe di laurea
+- [x] Includere argomenti di forza vs competitor
+- [x] Testare generazione email con Istologia
+
+## Test Valutazione Istologia (09/01/2026)
+- [ ] Verificare che la valutazione Istologia funzioni correttamente
+- [ ] Controllare che i moduli syllabus_modules vengano estratti correttamente
+- [ ] Verificare che il prompt riceva i dati corretti
+- [ ] Testare rigenerazione batch per Istologia
+
+
+## Estrazione Automatica PDF (09/01/2026) - SOSPESO
+- [ ] Implementare estrazione PDF con pdftotext nel backend
+- [ ] **NOTA**: Dopo ore di tentative, la soluzione non è stata completata
+- [ ] **ALTERNATIVA CONSIGLIATA**: Fornire script Python standalone agli utenti per convertire PDF in TXT
+- [ ] **LIMITE ATTUALE**: Gli utenti devono convertire manualmente i PDF in TXT prima di caricarli
+- [ ] **SCRIPT PYTHON FUNZIONANTE**: Disponibile - usa pypdf, funziona perfettamente in 10 minuti
+
+
+## Conversione PDF Integrata (09/01/2026) - NUOVA FEATURE
+- [ ] Creare servizio backend di conversione PDF con pypdf
+- [ ] Aggiungere procedura tRPC per conversione PDF
+- [ ] Creare pagina ConvertPdf con UI per upload e visualizzazione
+- [ ] Aggiungere voce menu e routing per la nuova pagina
+- [ ] Testare end-to-end con Ancona_Politecnica.pdf
+
+
+## Tool Conversione PDF Standalone (09/01/2026) - NUOVA FEATURE
+- [ ] Creare componente PdfConverterTool standalone
+- [ ] Aggiungere il tool nella home page
+- [ ] Testare end-to-end con Ancona_Politecnica.pdf
+
+
+---
+
+## Multi-Editore Feature (feature/multi-editore branch) - IN PROGRESS
+
+### Phase 1: Requirements Gathering
+- [ ] Definire esattamente quali modifiche fare per il multi-editore
+- [ ] Decidere come funziona il switch (localStorage, database, URL parameter)
+- [ ] Definire quali dati filtrano per editore (manuali, framework, analisi)
+- [ ] Identificare gli editori da supportare oltre a Zanichelli
+- [ ] Specificare qualsiasi altro requisito
+
+### Phase 2: Implementation
+- [ ] Creare copia locale di UNI-SCAN nel sandbox
+- [ ] Implementare publisher switch nelle Impostazioni
+- [ ] Aggiornare schema database per supportare filtro editore
+- [ ] Aggiornare tutte le query per filtrare per editore
+- [ ] Testare funzionalità end-to-end
+
+### Phase 3: Testing & Deployment
+- [x] Verificare che il switch editore funziona correttamente
+- [x] Testare che i dati si filtrano correttamente
+- [x] Testare che non ci sono errori TypeScript
+- [x] Documentare le modifiche
+- [x] Preparare per merge a main branch
+
+## Multi-Publisher Feature (Completata)
+- [x] Aggiungere PublisherContext per gestire lo stato del publisher selezionato
+- [x] Implementare usePublisher hook per accedere al publisher selezionato
+- [x] Aggiungere parametro publisher alle query tRPC
+- [x] Modificare backend per filtrare i manuali per publisher
+- [x] Aggiungere logica per assegnare il tipo "publisher" o "competitor" ai manuali
+- [x] Aggiungere useEffect per invalidare la cache quando il publisher cambia
+- [x] Aggiornare UI per visualizzare il tipo corretto dei manuali
+- [x] Testare il cambio di publisher e verificare che i tipi cambino dinamicamente
+
+## Prossime Funzionalita Suggerite
+- [ ] Aggiungere vista di confronto tra editori (affiancato)
+- [ ] Implementare analitiche per editore nel dashboard
+- [ ] Aggiungere filtri avanzati nel Database Manuali (anno, pagine, ecc.)
+
+## Bug Fixes - Publisher Feature (Completati)
+- [x] Correggere testo fuorviante nelle impostazioni sulla relazione editore-framework
+- [x] Debuggare e riparare la funzione "Confronta Manuali" che non funziona
+
+## Bug Fix - Confronta Manuali Data Display (Completato)
+- [x] Debuggare ManualComparisonTable per capire perché non mostra i dati delle valutazioni
+- [x] Verificare che i dati delle valutazioni siano recuperati correttamente dalla query
+- [x] Fixare il mapping dei dati di valutazione nella tabella di confronto
+- [x] Testare che la tabella mostra correttamente Approccio Didattico, Livello Contenuti, ecc.
+
+
+## Multi-Publisher Feature + Bug Fixes (Completato - 12/01/2026)
+- [x] Implementare PublisherContext per gestire lo stato del publisher selezionato
+- [x] Aggiungere usePublisher hook per accedere al publisher selezionato
+- [x] Aggiungere parametro publisher alle query tRPC
+- [x] Modificare backend per filtrare i manuali per publisher
+- [x] Aggiungere logica per assegnare il tipo "publisher" o "competitor" ai manuali
+- [x] Aggiungere useEffect per invalidare la cache quando il publisher cambia
+- [x] Aggiornare UI per visualizzare il tipo corretto dei manuali
+- [x] Testare il cambio di publisher e verificare che i tipi cambino dinamicamente
+- [x] Correggere testo fuorviante nelle impostazioni sulla relazione editore-framework
+- [x] Implementare componente ManualComparisonTable per confronto affiancato
+- [x] Debuggare e riparare la visualizzazione dei dati di valutazione nella tabella di confronto
+- [x] Verificare che tutti i dati del database vengono visualizzati correttamente nella tabella
+- [x] Testare la feature completa end-to-end
+
+## Bug Fix: Confronta Manuali - Formattazione Dati (Completato - 12/01/2026)
+- [x] Fixare accesso a contentLevel da overview.contentLevel (non content.contentLevel)
+- [x] Fixare accesso a overallCoverage (non overallPercentage)
+- [x] Verificare che strengths e weaknesses siano accessibili dalla root di content
+- [x] Creare test per verificare i pattern di accesso ai dati
+- [x] Testare che tutti i dati vengono visualizzati correttamente nella tabella di confronto
+
+## Esportazione HTML Confronto Manuali (Completato - 12/01/2026)
+- [x] Creare utility function per generare HTML
+- [x] Aggiungere pulsante di esportazione al componente ManualComparisonTable
+- [x] Testare che il file HTML sia scaricabile e modificabile
+- [x] Verificare che il file sia facilmente editabile in VS Code
+
+
+---
+
+## 📝 NOTES FOR NEXT SESSION
+
+**When you restart the project:**
+1. Read this file first to understand the current status
+2. Check the checkpoint version (currently 8a6b59cd)
+3. Look at ARCHITECTURE section to understand two-phase evaluation
+4. See NEXT PHASE section for what to work on
+5. Update this file when you complete tasks
+
+**Key Files:**
+- Evaluator: `server/services/improvedManualEvaluator.ts`
+- Router: `server/routers.ts`
+- UI Database: `client/src/pages/DatabaseManuali.tsx`
+- Schema: `drizzle/schema.ts`
+
+**Last Tested:**
+- Manual: "Atkins - Principi di Chimica"
+- Score: 92/100 (Eccellente)
+- Ideal for: L-2, L-13, L-26, L-27, L-29, LM-13
+- Weakness: Chimica inorganica descrittiva (65%)

@@ -6,10 +6,12 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import * as db from "./db";
 import { SUBJECTS } from "@shared/types";
-import * as dropbox from "./services/dropbox";
 import * as analysisService from "./services/analysis";
 import * as emailGenerator from "./services/emailGenerator";
-import * as manualEvaluator from "./services/manualEvaluator";
+import { generateImprovedManualEvaluation } from "./services/improvedManualEvaluator";
+import { transformEvaluationToTechnicalAnalysis } from "./services/evaluationTransformer";
+import { transformImprovedEvaluationToTechnicalAnalysis } from "./services/improvedEvaluationTransformer";
+import { renderEvaluationToHtml } from "./services/evaluationHtmlRenderer";;
 
 // Admin-only procedure
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -74,9 +76,9 @@ export const appRouter = router({
     }),
     
     setLlmProvider: protectedProcedure
-      .input(z.object({ provider: z.enum(["manus", "openai"]) }))
+      .input(z.object({ provider: z.enum(["manus", "openai", "perplexity", "claude"]) }))
       .mutation(async ({ ctx, input }) => {
-        await db.updateUserLlmProvider(ctx.user.id, input.provider);
+        await db.updateUserLlmProvider(ctx.user.id, input.provider as any);
         return { success: true };
       }),
   }),
@@ -120,6 +122,13 @@ export const appRouter = router({
           description: input.description,
         });
         return { id };
+      }),
+    
+    delete: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteSubject(input.id);
+        return { success: true };
       }),
   }),
 
@@ -166,14 +175,36 @@ export const appRouter = router({
         await db.updateFramework(id, data);
         return { success: true };
       }),
+    
+    delete: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        // Soft delete: mark as inactive
+        await db.updateFramework(input.id, { isActive: false });
+        return { success: true };
+      }),
+    
+    deactivateAll: adminProcedure
+      .mutation(async () => {
+        await db.deactivateAllFrameworks();
+        return { success: true };
+      })
   }),
 
   // Manuals
   manuals: router({
     listBySubject: protectedProcedure
-      .input(z.object({ subjectId: z.number() }))
+      .input(z.object({ subjectId: z.number(), publisher: z.string().optional() }))
       .query(async ({ input }) => {
-        return db.getManualsBySubject(input.subjectId);
+        const manuals = await db.getManualsBySubject(input.subjectId);
+        // If publisher is specified, modify the type of each manual
+        if (input.publisher) {
+          return manuals.map(manual => ({
+            ...manual,
+            type: manual.publisher === input.publisher ? input.publisher : "competitor"
+          }));
+        }
+        return manuals;
       }),
     
     getZanichelli: protectedProcedure
@@ -230,7 +261,8 @@ export const appRouter = router({
     delete: adminProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
-        await db.deleteManual(input.id);
+        // Soft delete: mark as inactive
+        await db.updateManual(input.id, { isActive: false });
         return { success: true };
       }),
     
@@ -245,96 +277,85 @@ export const appRouter = router({
         return { success: true };
       }),
     
-    // Reimport index from Dropbox for a single manual
-    reimportIndexFromDropbox: adminProcedure
+    // Restore a soft-deleted manual
+    restore: adminProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(async ({ ctx, input }) => {
-        // Get manual info
-        const manual = await db.getManualById(input.id);
-        if (!manual) {
-          throw new TRPCError({ code: "NOT_FOUND", message: "Manuale non trovato" });
+      .mutation(async ({ input }) => {
+        await db.updateManual(input.id, { isActive: true });
+        return { success: true };
+      }),
+    regenerateAllEvaluations: adminProcedure
+      .input(z.object({ subjectId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        const manuals = await db.getManualsBySubject(input.subjectId);
+        const framework = await db.getActiveFramework(input.subjectId);
+        
+        if (!framework) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Framework non trovato" });
         }
         
-        // Get subject info
-        const subject = await db.getSubjectById(manual.subjectId);
-        if (!subject) {
-          throw new TRPCError({ code: "NOT_FOUND", message: "Materia non trovata" });
+        const subject = await db.getSubjectById(input.subjectId);
+        const subjectName = subject?.name || "Materia";
+        
+        let successCount = 0;
+        let errorCount = 0;
+        const errors: string[] = [];
+        
+        for (const manual of manuals) {
+          try {
+            if (!manual.indexContent) {
+              errorCount++;
+              errors.push(manual.title + ": Indice non caricato");
+              continue;
+            }
+            
+            const evaluation = await generateImprovedManualEvaluation(
+              ctx.user.id,
+              framework,
+              { title: manual.title, author: manual.author, publisher: manual.publisher, index: manual.indexContent },
+              subjectName
+            );
+            
+            // Render to HTML for storage
+            const htmlContent = renderEvaluationToHtml(
+              evaluation,
+              { title: manual.title, author: manual.author, publisher: manual.publisher }
+            );
+            
+            const existingEval = await db.getEvaluationByManual(manual.id);
+            
+            if (existingEval) {
+              await db.updateEvaluation(existingEval.id, {
+                content: htmlContent as any,
+                overallScore: evaluation.overallScore,
+                verdict: evaluation.verdict,
+              });
+            } else {
+              await db.createEvaluation({
+                manualId: manual.id,
+                frameworkId: framework.id,
+                content: htmlContent as any,
+                overallScore: evaluation.overallScore,
+                verdict: evaluation.verdict,
+              });
+            }
+            
+            successCount++;
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          } catch (error) {
+            console.error(`[regenerateAllEvaluations] Errore per manuale ${manual.title}:`, error);
+            errorCount++;
+            const msg = error instanceof Error ? error.message : "Errore sconosciuto";
+            errors.push(manual.title + ": " + msg);
+          }
         }
         
-        // Determine folder path based on manual type
-        const basePath = manual.type === "zanichelli" 
-          ? "/2_Manuali_Zanichelli" 
-          : "/3_manuali_competitor";
-        
-        // List files in the subject subfolder
-        const subjectFolder = `${basePath}/${subject.name}`;
-        let files;
-        try {
-          files = await dropbox.listDropboxFolder(ctx.user.id, subjectFolder);
-        } catch {
-          // Try with code instead of name
-          const altFolder = `${basePath}/${subject.code}`;
-          files = await dropbox.listDropboxFolder(ctx.user.id, altFolder);
-        }
-        
-        // Find matching file by manual title or author
-        const normalizeTitle = (t: string) => t.toLowerCase().replace(/[^a-z0-9]/g, "");
-        const manualTitleNorm = normalizeTitle(manual.title);
-        const manualAuthorNorm = normalizeTitle(manual.author || "");
-        
-        // Log available files for debugging
-        console.log(`[Dropbox] Looking for manual: "${manual.title}" by ${manual.author}`);
-        console.log(`[Dropbox] Available files:`, files.map(f => f.name));
-        
-        // Try multiple matching strategies
-        let matchingFile = files.find(f => {
-          const fileTitle = normalizeTitle(f.name.replace(".json", ""));
-          // Exact title match
-          return fileTitle === manualTitleNorm;
-        });
-        
-        if (!matchingFile) {
-          // Try partial title match
-          matchingFile = files.find(f => {
-            const fileTitle = normalizeTitle(f.name.replace(".json", ""));
-            return fileTitle.includes(manualTitleNorm) || manualTitleNorm.includes(fileTitle);
-          });
-        }
-        
-        if (!matchingFile) {
-          // Try author match (file might be named by author)
-          matchingFile = files.find(f => {
-            const fileTitle = normalizeTitle(f.name.replace(".json", ""));
-            return fileTitle.includes(manualAuthorNorm) || manualAuthorNorm.includes(fileTitle);
-          });
-        }
-        
-        if (!matchingFile) {
-          // Try combined title+author match
-          matchingFile = files.find(f => {
-            const fileTitle = normalizeTitle(f.name.replace(".json", ""));
-            const combined = manualTitleNorm + manualAuthorNorm;
-            return fileTitle.includes(combined.slice(0, 10)) || combined.includes(fileTitle.slice(0, 10));
-          });
-        }
-        
-        if (!matchingFile) {
-          throw new TRPCError({ 
-            code: "NOT_FOUND", 
-            message: `File non trovato su Dropbox per: ${manual.title}. File disponibili: ${files.map(f => f.name).join(", ")}` 
-          });
-        }
-        
-        // Download and update
-        const content = await dropbox.downloadDropboxFile(ctx.user.id, matchingFile.path_lower);
-        const indexContent = content.indice || content.index || content;
-        
-        await db.updateManual(input.id, { indexContent });
-        
-        return { 
-          success: true, 
-          fileName: matchingFile.name,
-          chaptersCount: Array.isArray(indexContent?.capitoli) ? indexContent.capitoli.length : 0
+        return {
+          success: true,
+          successCount,
+          errorCount,
+          errors,
+          message: "Rigenerazione completata: " + successCount + " valutazioni, " + errorCount + " errori"
         };
       }),
   }),
@@ -407,35 +428,43 @@ export const appRouter = router({
         const subjectName = subject?.name || "Materia non specificata";
         
         // Generate evaluation
-        const evaluation = await manualEvaluator.generateManualEvaluation(
+        const evaluation = await generateImprovedManualEvaluation(
           ctx.user.id,
-          { title: manual.title, author: manual.author, publisher: manual.publisher },
-          manual.indexContent as any,
-          framework.content as any,
+          framework,
+          { title: manual.title, author: manual.author, publisher: manual.publisher, index: manual.indexContent },
           subjectName
+        );
+        
+        // Render to HTML for storage
+        const htmlContent = renderEvaluationToHtml(
+          evaluation,
+          { title: manual.title, author: manual.author, publisher: manual.publisher }
         );
         
         // Check if evaluation already exists
         const existingEval = await db.getEvaluationByManual(input.manualId);
         
+        // Transform evaluation to technicalAnalysis format
+        const technicalAnalysis = transformImprovedEvaluationToTechnicalAnalysis(evaluation);
+        
         if (existingEval) {
           // Update existing
           await db.updateEvaluation(existingEval.id, {
-            content: evaluation,
+            content: htmlContent as any,
             overallScore: evaluation.overallScore,
             verdict: evaluation.verdict,
           });
-          return { id: existingEval.id, evaluation };
+          return { id: existingEval.id, evaluation: htmlContent };
         } else {
           // Create new
           const id = await db.createEvaluation({
             manualId: input.manualId,
             frameworkId: input.frameworkId,
-            content: evaluation,
+            content: htmlContent as any,
             overallScore: evaluation.overallScore,
             verdict: evaluation.verdict,
           });
-          return { id, evaluation };
+          return { id, evaluation: htmlContent };
         }
       }),
   }),
@@ -454,6 +483,20 @@ export const appRouter = router({
           throw new TRPCError({ code: "NOT_FOUND" });
         }
         return analysis;
+      }),
+    
+    getManualEvaluation: protectedProcedure
+      .input(z.object({ analysisId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const analysis = await db.getAnalysisById(input.analysisId);
+        if (!analysis || analysis.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        if (!analysis.primaryManualId) {
+          return null;
+        }
+        const evaluation = await db.getEvaluationByManual(analysis.primaryManualId);
+        return evaluation?.content || null;
       }),
     
     create: protectedProcedure
@@ -518,6 +561,7 @@ export const appRouter = router({
         universityName: z.string().optional(),
         professorName: z.string().optional(),
         degreeCourse: z.string().optional(),
+        degreeClass: z.string().optional(),
         primaryManualId: z.number().optional(),
         primaryManualCustom: z.object({
           title: z.string(),
@@ -594,6 +638,7 @@ export const appRouter = router({
             courseName: input.programTitle,
             professorName: input.professorName,
             degreeCourse: input.degreeCourse,
+            degreeClass: input.degreeClass,
             primaryManual: primaryManualData,
             alternativeManuals: alternativeManualsData.length > 0 ? alternativeManualsData : undefined,
           });
@@ -704,6 +749,37 @@ export const appRouter = router({
           });
         }
       }),
+
+    convertPdf: publicProcedure
+      .input(z.object({
+        pdfBase64: z.string().min(1),
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          const base64Data = input.pdfBase64.replace(/^data:application\/pdf;base64,/, "");
+          const buffer = Buffer.from(base64Data, "base64");
+          const fs = await import("fs").then(m => m.promises);
+          const path = await import("path");
+          const os = await import("os");
+          const tmpDir = os.tmpdir();
+          const tmpFile = path.join(tmpDir, `pdf-${Date.now()}.pdf`);
+          await fs.writeFile(tmpFile, buffer);
+          const { execFile: execFileCallback } = await import("child_process");
+          const { promisify } = await import("util");
+          const execFile = promisify(execFileCallback);
+          const { stdout } = await execFile("pdftotext", [tmpFile, "-"]);
+          await fs.unlink(tmpFile);
+          return {
+            testo: stdout,
+            success: true,
+          };
+        } catch (error) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: error instanceof Error ? error.message : "Errore durante la conversione del PDF",
+          });
+        }
+      }),
   }),
 
   // Promoter Profile
@@ -729,206 +805,8 @@ export const appRouter = router({
       }),
   }),
 
-  // Dropbox Integration
-  dropbox: router({
-    // Get folder structure from Dropbox
-    getFolderStructure: adminProcedure.query(async ({ ctx }) => {
-      try {
-        const structure = await dropbox.getDropboxFolderStructure(ctx.user.id);
-        return { success: true, structure };
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "Unknown error";
-        return { success: false, error: message, structure: {} };
-      }
-    }),
-
-    // Import frameworks from Dropbox
-    importFrameworks: adminProcedure.mutation(async ({ ctx }) => {
-      const frameworks = await dropbox.getFrameworksFromDropbox(ctx.user.id);
-      const results = { imported: 0, errors: [] as string[] };
-
-      for (const fw of frameworks) {
-        try {
-          // Find matching subject
-          const subjectCode = fw.subjectCode
-            .replace(/_/g, "_")
-            .toLowerCase();
-          
-          const allSubjects = await db.getAllSubjects();
-          const subject = allSubjects.find(
-            (s) => s.code.toLowerCase() === subjectCode ||
-                   s.code.toLowerCase().replace(/_/g, "") === subjectCode.replace(/_/g, "")
-          );
-
-          if (!subject) {
-            results.errors.push(`Subject not found for: ${fw.fileName}`);
-            continue;
-          }
-
-          // Check if framework already exists
-          const existing = await db.getActiveFramework(subject.id);
-          if (existing) {
-            // Update existing
-            await db.updateFramework(existing.id, { content: fw.content });
-          } else {
-            // Create new
-            await db.createFramework({
-              subjectId: subject.id,
-              version: "1.0",
-              content: fw.content,
-              createdBy: ctx.user.id,
-            });
-          }
-          results.imported++;
-        } catch (error) {
-          const msg = error instanceof Error ? error.message : "Unknown error";
-          results.errors.push(`${fw.fileName}: ${msg}`);
-        }
-      }
-
-      return results;
-    }),
-
-    // Import manuals from Dropbox
-    importManuals: adminProcedure
-      .input(z.object({ type: z.enum(["zanichelli", "competitor"]) }))
-      .mutation(async ({ ctx, input }) => {
-        const manuals = input.type === "zanichelli"
-          ? await dropbox.getZanichelliManualsFromDropbox(ctx.user.id)
-          : await dropbox.getCompetitorManualsFromDropbox(ctx.user.id);
-
-        const results = { imported: 0, errors: [] as string[] };
-        const allSubjects = await db.getAllSubjects();
-
-        for (const manual of manuals) {
-          try {
-            const content = manual.content;
-            
-            // Extract manual info from content
-            const title = content.titolo || content.title || manual.fileName.replace(".json", "");
-            const author = content.autore || content.author || "N/A";
-            const publisher = input.type === "zanichelli" ? "Zanichelli" : (content.editore || content.publisher || "N/A");
-            
-            // Use subjectCode from folder structure (more reliable)
-            const subjectCodeFromFolder = manual.subjectCode || "";
-            const subjectName = content.materia || content.subject || "";
-
-            // Find matching subject - first try folder code, then content
-            let subject = allSubjects.find(
-              (s) => s.code.toLowerCase() === subjectCodeFromFolder.toLowerCase() ||
-                     s.code.toLowerCase().replace(/_/g, "") === subjectCodeFromFolder.toLowerCase().replace(/_/g, "")
-            );
-            
-            // Fallback to content-based matching
-            if (!subject && subjectName) {
-              subject = allSubjects.find(
-                (s) => s.name.toLowerCase().includes(subjectName.toLowerCase()) ||
-                       subjectName.toLowerCase().includes(s.name.toLowerCase()) ||
-                       s.code.toLowerCase() === subjectName.toLowerCase().replace(/ /g, "_")
-              );
-            }
-
-            if (!subject) {
-              results.errors.push(`Subject not found for manual: ${title} (folder: ${subjectCodeFromFolder})`);
-              continue;
-            }
-
-            // Create manual
-            await db.createManual({
-              subjectId: subject.id,
-              title,
-              author,
-              publisher,
-              type: input.type,
-              indexContent: content.indice || content.index || content,
-              createdBy: ctx.user.id,
-            });
-            results.imported++;
-          } catch (error) {
-            const msg = error instanceof Error ? error.message : "Unknown error";
-            results.errors.push(`${manual.fileName}: ${msg}`);
-          }
-        }
-
-        return results;
-      }),
-
-    // List files in a specific folder
-    listFolder: adminProcedure
-      .input(z.object({ path: z.string() }))
-      .query(async ({ ctx, input }) => {
-        try {
-          const files = await dropbox.listDropboxFolder(ctx.user.id, input.path);
-          return { success: true, files };
-        } catch (error) {
-          const message = error instanceof Error ? error.message : "Unknown error";
-          return { success: false, error: message, files: [] };
-        }
-      }),
-
-    // Get OAuth authorization URL
-    getAuthUrl: adminProcedure
-      .input(z.object({
-        appKey: z.string().min(1),
-        redirectUri: z.string().url(),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        const state = `${ctx.user.id}_${Date.now()}`;
-        const authUrl = dropbox.getDropboxAuthUrl(input.appKey, input.redirectUri, state);
-        return { authUrl, state };
-      }),
-
-    // Exchange authorization code for tokens
-    exchangeCode: adminProcedure
-      .input(z.object({
-        code: z.string().min(1),
-        appKey: z.string().min(1),
-        appSecret: z.string().min(1),
-        redirectUri: z.string().url(),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        try {
-          const { accessToken, refreshToken, expiresIn } = await dropbox.exchangeCodeForTokens(
-            input.code,
-            input.appKey,
-            input.appSecret,
-            input.redirectUri
-          );
-
-          // Calculate expiration time
-          const expiresAt = new Date(Date.now() + expiresIn * 1000);
-
-          // Save tokens to database (including appKey and appSecret for auto-refresh)
-          await db.upsertApiConfigWithRefresh(
-            ctx.user.id,
-            "dropbox",
-            accessToken,
-            refreshToken,
-            expiresAt,
-            input.appKey,
-            input.appSecret
-          );
-
-          return { 
-            success: true, 
-            message: "Dropbox connesso con successo! Il token verrà rinnovato automaticamente.",
-            expiresAt 
-          };
-        } catch (error) {
-          const message = error instanceof Error ? error.message : "Unknown error";
-          throw new TRPCError({ code: "BAD_REQUEST", message });
-        }
-      }),
-
-    // Check if refresh token is configured
-    hasRefreshToken: protectedProcedure.query(async ({ ctx }) => {
-      const config = await db.getApiConfig(ctx.user.id, "dropbox");
-      return {
-        hasRefreshToken: !!config?.refreshToken,
-        tokenExpiresAt: config?.tokenExpiresAt || null,
-      };
-    }),
-  }),
+  // Dropbox Integration - COMPLETAMENTE RIMOSSO
+  // Gli utenti caricano i framework e i manuali direttamente via UI
 });
 
 export type AppRouter = typeof appRouter;

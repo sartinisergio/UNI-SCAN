@@ -1,0 +1,19 @@
+{
+  "query": "SELECT m.id, m.title, m.author, me.id as eval_id, me.overallScore, me.verdict, me.generatedAt FROM manuals m LEFT JOIN manual_evaluations me ON m.id = me.manualId WHERE m.title LIKE '%Principi di Chimica%' AND m.author LIKE '%Atkins%' LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2SqZsxfbXQHvi7k.root --database EnsVFtthx7GmB9n2DgDusz --execute SELECT m.id, m.title, m.author, me.id as eval_id, me.overallScore, me.verdict, me.generatedAt FROM manuals m LEFT JOIN manual_evaluations me ON m.id = me.manualId WHERE m.title LIKE '%Principi di Chimica%' AND m.author LIKE '%Atkins%' LIMIT 1;",
+  "rows": [
+    {
+      "id": "3",
+      "title": "Principi di Chimica",
+      "author": "Atkins",
+      "eval_id": "210001",
+      "overallScore": "85",
+      "verdict": "Buono",
+      "generatedAt": "2026-01-21 11:54:24"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tauthor\teval_id\toverallScore\tverdict\tgeneratedAt\n3\tPrincipi di Chimica\tAtkins\t210001\t85\tBuono\t2026-01-21 11:54:24\n",
+  "stderr": "",
+  "execution_time_ms": 50
+}

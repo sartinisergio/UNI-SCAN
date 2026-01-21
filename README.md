@@ -1,334 +1,292 @@
-# UNI-SCAN - Sistema di Analisi e Confronto di Programmi e Manuali Universitari
+# UNI-SCAN
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Node.js](https://img.shields.io/badge/node.js-v20-green.svg)
-![React](https://img.shields.io/badge/react-19-blue.svg)
-![Database](https://img.shields.io/badge/database-MySQL%2FPostgreSQL%2FSQLite-orange.svg)
+**Sistema di Analisi e Confronto di Programmi e Manuali Universitari**
 
-## 📋 Descrizione
-
-**UNI-SCAN** è una piattaforma web completa per l'analisi, la valutazione e il confronto di programmi e manuali universitari. Consente agli editori di gestire framework didattici, analizzare manuali con intelligenza artificiale, e confrontare più testi per identificare gap e opportunità di miglioramento.
-
-### Funzionalità Principali
-
-- ✅ **Gestione Framework Didattici**: Crea e gestisci framework di valutazione personalizzati
-- ✅ **Database Manuali**: Catalogo completo dei manuali con metadati (editore, autore, anno, prezzo, ecc.)
-- ✅ **Analisi Automatica**: Utilizza l'IA per analizzare manuali e valutare la copertura del framework
-- ✅ **Confronto Manuali**: Confronta fino a 3 manuali contemporaneamente con tabella comparativa
-- ✅ **Esportazione HTML**: Esporta i confronti in HTML modificabile
-- ✅ **Dashboard Analitiche**: Visualizza statistiche e metriche di valutazione
-- ✅ **Gestione Dati**: CRUD completo per framework, manuali e valutazioni
-- ✅ **Autenticazione**: Sistema di login sicuro con OAuth
+UNI-SCAN è un'applicazione web che permette di analizzare e confrontare i programmi universitari con i manuali di testo, identificando gap di copertura e allineamenti tra il contenuto teorico atteso e quello effettivamente trattato nei testi.
 
 ---
 
-## 🚀 Quick Start
+## 🎯 Funzionalità Principali
 
-### Prerequisiti
+### 1. **Gestione Materie**
+- ✅ Creazione di nuove materie con codice, nome e descrizione
+- ✅ Eliminazione di materie dal sistema
+- ✅ Visualizzazione dinamica di tutte le materie disponibili
 
-- Node.js v18+
-- pnpm v8+
-- Database (MySQL 8.0+, PostgreSQL 12+, o SQLite)
+### 2. **Gestione Framework di Valutazione**
+- ✅ Caricamento di framework ideali (struttura teorica)
+- ✅ Gestione di framework reali (modulati su programmi effettivi)
+- ✅ Supporto per multiple classi di laurea (L-XX, LM-XX)
+- ✅ Criteri di valutazione personalizzabili
 
-### Installazione Locale
+### 3. **Database Manuali**
+- ✅ Caricamento e gestione di manuali per editore
+- ✅ Supporto per multiple editori (Zanichelli, Edises, Pearson, ecc.)
+- ✅ Indicizzazione e ricerca veloce
 
-```bash
-# Clonare il repository
-git clone https://github.com/sartinisergio/UNI-SCAN.git
-cd UNI-SCAN
+### 4. **Analisi Situazionale**
+- ✅ Analisi automatica di programmi universitari
+- ✅ Identificazione di gap di copertura
+- ✅ Valutazione dell'allineamento tra programmi e manuali
+- ✅ Generazione di rapporti dettagliati
 
-# Installare le dipendenze
-pnpm install
-
-# Configurare le variabili di ambiente
-cp .env.example .env.local
-# Editare .env.local con le tue credenziali
-
-# Eseguire le migrazioni del database
-pnpm db:push
-
-# Avviare il dev server
-pnpm dev
-```
-
-L'applicazione sarà disponibile su `http://localhost:3000`
+### 5. **Storico Analisi**
+- ✅ Tracciamento di tutte le analisi effettuate
+- ✅ Visualizzazione storica dei risultati
+- ✅ Esportazione dati
 
 ---
 
-## 📚 Documentazione
+## 🛠️ Stack Tecnologico
 
-### Per Utenti
-- **[Guida Utente](./docs/user-guide.md)** - Come usare l'applicazione
-- **[FAQ](./docs/faq.md)** - Domande frequenti
+### Frontend
+- **React 19** - UI framework
+- **Tailwind CSS 4** - Styling
+- **TypeScript** - Type safety
+- **tRPC** - End-to-end type-safe APIs
+- **Shadcn/UI** - Component library
+- **Wouter** - Lightweight router
 
-### Per Sviluppatori
-- **[Architettura](./docs/architecture.md)** - Struttura tecnica del progetto
-- **[API Documentation](./docs/api.md)** - Endpoint tRPC disponibili
-- **[Database Schema](./drizzle/schema.ts)** - Schema del database
+### Backend
+- **Express 4** - Web server
+- **Node.js** - Runtime
+- **tRPC 11** - RPC framework
+- **Drizzle ORM** - Database ORM
+- **MySQL/TiDB** - Database
 
-### Per DevOps/IT
-- **[Guida di Deployment](./deployment.md)** - Come installare su server interno
-- **[Configurazione](./docs/configuration.md)** - Variabili di ambiente e setup
-- **[Troubleshooting](./deployment.md#troubleshooting)** - Risoluzione problemi comuni
-
----
-
-## 🏗️ Stack Tecnologico
-
-| Layer | Tecnologia |
-|-------|-----------|
-| **Frontend** | React 19, TypeScript, Tailwind CSS 4, Vite |
-| **Backend** | Express 4, tRPC 11, Node.js |
-| **Database** | Drizzle ORM (MySQL, PostgreSQL, SQLite) |
-| **Build Tool** | Vite |
-| **Package Manager** | pnpm |
-| **Testing** | Vitest |
-| **UI Components** | shadcn/ui |
+### Services
+- **Manus OAuth** - Authentication
+- **Manus LLM** - AI-powered analysis
+- **AWS S3** - File storage
+- **PDF.js** - PDF processing
 
 ---
 
-## 📁 Struttura del Progetto
+## 📋 Struttura del Progetto
 
 ```
 uni-scan/
 ├── client/                 # Frontend React
 │   ├── src/
-│   │   ├── pages/         # Pagine dell'applicazione
-│   │   ├── components/    # Componenti riutilizzabili
-│   │   ├── lib/           # Utility e configurazioni
-│   │   └── App.tsx        # Routing principale
-│   └── index.html
+│   │   ├── pages/         # Page components
+│   │   ├── components/    # Reusable components
+│   │   ├── lib/           # Utilities (tRPC client, etc.)
+│   │   └── App.tsx        # Main app component
+│   └── public/            # Static assets
 ├── server/                 # Backend Express + tRPC
-│   ├── routers.ts         # Definizione procedure tRPC
-│   ├── db.ts              # Query helper
-│   └── services/          # Servizi (LLM, email, ecc.)
-├── drizzle/               # Database schema e migrazioni
-│   └── schema.ts          # Definizione tabelle
-├── shared/                # Codice condiviso
-├── deployment.md          # Guida di deployment
-├── package.json
-└── vite.config.ts
+│   ├── _core/             # Framework code (OAuth, tRPC setup, etc.)
+│   ├── services/          # Business logic (analysis, evaluation, etc.)
+│   ├── routers.ts         # tRPC procedures
+│   └── db.ts              # Database queries
+├── drizzle/               # Database schema & migrations
+│   ├── schema.ts          # Table definitions
+│   └── migrations/        # SQL migrations
+├── shared/                # Shared types & constants
+├── storage/               # S3 helpers
+└── package.json           # Dependencies
 ```
 
 ---
 
-## 🔧 Comandi Disponibili
+## 🚀 Quick Start
 
+### Prerequisites
+- **Node.js 22+**
+- **pnpm 10+**
+- **MySQL/TiDB database**
+- **Manus account** (for OAuth and services)
+
+### Installation
+
+1. **Clone the repository**
 ```bash
-# Sviluppo
-pnpm dev              # Avvia dev server (frontend + backend)
-pnpm build            # Build per produzione
-pnpm start            # Avvia server di produzione
-
-# Database
-pnpm db:push          # Esegui migrazioni
-pnpm db:studio        # Apri interfaccia web per il database
-pnpm db:generate      # Genera migrazioni da schema
-
-# Testing
-pnpm test             # Esegui test con Vitest
-pnpm test:watch       # Test in modalità watch
-
-# Linting
-pnpm lint             # Verifica codice con ESLint
-pnpm format           # Formatta codice con Prettier
+git clone https://github.com/sartinisergio/UNI-SCAN.git
+cd UNI-SCAN
 ```
 
----
-
-## 🗄️ Database
-
-### Schema Principale
-
-L'applicazione utilizza le seguenti tabelle:
-
-- **frameworks**: Framework didattici di valutazione
-- **subjects**: Materie/discipline universitarie
-- **manuals**: Manuali universitari
-- **manual_evaluations**: Valutazioni dei manuali
-- **users**: Utenti dell'applicazione
-
-Vedi `drizzle/schema.ts` per i dettagli completi.
-
-### Migrazioni
-
-Le migrazioni sono gestite automaticamente con Drizzle ORM:
-
+2. **Install dependencies**
 ```bash
-# Applicare migrazioni
-pnpm db:push
-
-# Visualizzare stato
-pnpm db:studio
+pnpm install
 ```
 
----
-
-## 🔐 Variabili di Ambiente
-
-### Obbligatorie
-
-```env
+3. **Set up environment variables**
+Create a `.env.local` file with:
+```
 DATABASE_URL=mysql://user:password@localhost:3306/uni_scan
-JWT_SECRET=your-secret-key-min-32-chars
-```
-
-### Opzionali
-
-```env
-PORT=3000
-NODE_ENV=development
-OPENAI_API_KEY=sk-...
+JWT_SECRET=your-secret-key
 VITE_APP_ID=your-app-id
 OAUTH_SERVER_URL=https://api.manus.im
+# ... other env vars
 ```
 
-Vedi `deployment.md` per la lista completa.
+4. **Run database migrations**
+```bash
+pnpm db:push
+```
+
+5. **Start development server**
+```bash
+pnpm dev
+```
+
+The app will be available at `http://localhost:3000`
 
 ---
 
-## 🚀 Deployment
+## 📚 Key Workflows
 
-### Su Server Interno Zanichelli
+### Creating a New Subject
 
-Seguire la [Guida di Deployment](./deployment.md) che include:
+1. Go to **Gestione Dati** (Data Management)
+2. Click **"Nuova Materia"** (New Subject)
+3. Fill in:
+   - **Codice Materia** (Subject Code, e.g., "biochimica")
+   - **Nome Materia** (Subject Name, e.g., "Biochimica")
+   - **Descrizione** (Description, optional)
+4. Click **"Crea Materia"** (Create Subject)
+5. The new subject appears in the dropdown
 
-- Installazione su Linux/Windows
-- Configurazione database
-- Setup con PM2 o Systemd
-- Configurazione Nginx reverse proxy
-- Docker (opzionale)
+### Creating a Framework
 
-### Su Manus Cloud (Attualmente in Uso)
+1. Create an ideal framework (JSON) using the template
+2. Pass it to CoreX with university programs
+3. CoreX produces a real framework
+4. Upload the real framework in **Gestione Dati**
 
-L'applicazione è attualmente ospitata su Manus:
-- **URL**: https://uniscansys-ensvftth.manus.space
-- **Database**: Gestito da Manus
-- **Backup**: Contattare supporto Manus
+### Running an Analysis
+
+1. Select a subject
+2. Click **"Nuova Analisi"** (New Analysis)
+3. Upload a university program (PDF)
+4. Select evaluation framework
+5. System analyzes and generates report
 
 ---
 
-## 📊 Funzionalità Dettagliate
+## 🗄️ Database Schema
 
-### 1. Gestione Framework
-- Crea framework didattici personalizzati
-- Definisci indicatori di valutazione
-- Configura pesi e metriche
+### Main Tables
 
-### 2. Database Manuali
-- Aggiungi manuali con metadati completi
-- Carica PDF e documenti
-- Gestisci informazioni editore/autore
+| Table | Purpose |
+|-------|---------|
+| `users` | User accounts and roles |
+| `subjects` | University subjects/courses |
+| `frameworks` | Evaluation frameworks (ideal & real) |
+| `manuals` | Textbook references |
+| `analyses` | Analysis results |
+| `manual_evaluations` | Manual evaluation scores |
 
-### 3. Analisi Automatica
-- Utilizza IA (LLM) per analizzare contenuti
-- Valuta copertura framework automaticamente
-- Genera report di valutazione
+---
 
-### 4. Confronto Manuali
-- Seleziona fino a 3 manuali
-- Visualizza tabella comparativa
-- Esporta in HTML modificabile
+## 🔐 Authentication
 
-### 5. Dashboard
-- Visualizza statistiche generali
-- Monitora analisi in corso
-- Accedi a dati storici
+UNI-SCAN uses **Manus OAuth** for authentication:
+- Users login via Manus portal
+- Session stored in secure HTTP-only cookie
+- Admin role required for management features
+- Protected procedures via `protectedProcedure` and `adminProcedure`
 
 ---
 
 ## 🧪 Testing
 
-L'applicazione include test con Vitest:
-
+Run tests with:
 ```bash
-# Eseguire tutti i test
 pnpm test
-
-# Test in modalità watch
-pnpm test:watch
-
-# Test con coverage
-pnpm test:coverage
 ```
 
-Vedi `server/*.test.ts` per esempi di test.
+Tests are located in `*.test.ts` files throughout the project.
 
 ---
 
-## 🐛 Bug Report e Feature Request
+## 📦 Build & Deploy
 
-### Segnalare un Bug
+### Build for production
+```bash
+pnpm build
+```
 
-1. Apri una [Issue](https://github.com/sartinisergio/UNI-SCAN/issues)
-2. Descrivi il problema in dettaglio
-3. Includi step per riprodurre il bug
-4. Allega screenshot se rilevante
-
-### Richiedere una Feature
-
-1. Apri una [Discussion](https://github.com/sartinisergio/UNI-SCAN/discussions)
-2. Descrivi la feature desiderata
-3. Spiega il caso d'uso
+### Start production server
+```bash
+pnpm start
+```
 
 ---
 
-## 📝 Changelog
+## 🤝 Contributing
 
-### v1.0.0 (12 Gennaio 2026)
-- ✅ Release iniziale
-- ✅ Gestione framework e manuali
-- ✅ Analisi automatica con IA
-- ✅ Confronto manuali con esportazione HTML
-- ✅ Dashboard e statistiche
-- ✅ Sistema di autenticazione
-
----
-
-## 📄 Licenza
-
-Questo progetto è licenziato sotto la [MIT License](./LICENSE).
+1. Create a feature branch: `git checkout -b feature/your-feature`
+2. Make your changes
+3. Write/update tests
+4. Commit: `git commit -m "Add feature description"`
+5. Push: `git push origin feature/your-feature`
+6. Create a Pull Request
 
 ---
 
-## 👥 Autori
+## 📝 Development Guidelines
 
-- **Sergio Sartini** - Sviluppo iniziale
+### Code Style
+- Use TypeScript for type safety
+- Follow ESLint configuration
+- Format with Prettier: `pnpm format`
+
+### Database Changes
+1. Update schema in `drizzle/schema.ts`
+2. Run `pnpm db:push` to generate migrations
+3. Test migrations locally
+4. Commit schema and migrations
+
+### Adding Features
+1. Create database helpers in `server/db.ts`
+2. Add tRPC procedures in `server/routers.ts`
+3. Create UI components in `client/src/pages/` or `client/src/components/`
+4. Wire components with tRPC hooks
+5. Write tests in `*.test.ts` files
 
 ---
 
-## 🤝 Contribuire
+## 🐛 Troubleshooting
 
-Le contribuzioni sono benvenute! Per contribuire:
+### Database Connection Error
+- Check `DATABASE_URL` in `.env.local`
+- Verify database is running
+- Check credentials
 
-1. Fai un fork del repository
-2. Crea un branch per la tua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit i tuoi cambiamenti (`git commit -m 'Add some AmazingFeature'`)
-4. Push al branch (`git push origin feature/AmazingFeature`)
-5. Apri una Pull Request
+### OAuth Login Fails
+- Verify `VITE_APP_ID` and `OAUTH_SERVER_URL`
+- Check Manus account settings
+- Clear browser cookies
+
+### Build Errors
+- Run `pnpm install` to ensure dependencies are correct
+- Run `pnpm check` to check TypeScript
+- Clear `.next` and `dist` directories
 
 ---
 
 ## 📞 Support
 
-Per domande o supporto:
-
-- **Email**: sergio.sartini@zanichelli.it
-- **GitHub Issues**: https://github.com/sartinisergio/UNI-SCAN/issues
-- **Documentazione**: Vedi cartella `docs/`
-
----
-
-## 🎯 Roadmap
-
-- [ ] Integrazione con più provider LLM
-- [ ] Esportazione PDF con formattazione avanzata
-- [ ] Grafici comparativi interattivi
-- [ ] API REST pubblica
-- [ ] Mobile app (React Native)
-- [ ] Sincronizzazione multi-editore
-- [ ] Versioning e tracking delle modifiche
+For issues or questions:
+1. Check existing GitHub issues
+2. Create a new issue with detailed description
+3. Include error messages and steps to reproduce
 
 ---
 
-**Ultimo aggiornamento**: 12 Gennaio 2026
+## 📄 License
+
+MIT License - See LICENSE file for details
+
+---
+
+## 🙏 Acknowledgments
+
+- Built with React, Tailwind CSS, and tRPC
+- Powered by Manus platform
+- Uses Drizzle ORM for database management
+
+---
+
+**Last Updated:** January 2026  
+**Version:** 1.0.0

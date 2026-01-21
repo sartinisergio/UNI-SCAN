@@ -1,29 +1,22 @@
-import { drizzle } from "drizzle-orm/mysql2/promise";
-import mysql from "mysql2/promise";
-import { frameworks } from "./drizzle/schema.ts";
+import { getDb } from './server/db.ts';
+import { manualEvaluations, manuals } from './drizzle/schema.ts';
 
-const connection = await mysql.createConnection(process.env.DATABASE_URL);
-const db = drizzle(connection);
+const db = await getDb();
+const evals = await db.select().from(manualEvaluations).limit(1);
 
-const result = await db.select().from(frameworks).where({ subjectId: 1 }).limit(1);
-
-if (result.length > 0) {
-  const fw = result[0];
-  const content = JSON.stringify(fw.content);
-  
-  console.log("Framework ID:", fw.id);
-  console.log("Subject ID:", fw.subjectId);
-  console.log("Version:", fw.version);
-  console.log("Content length:", content.length);
-  console.log("Content starts with:", content.substring(0, 100));
-  console.log("Content ends with:", content.substring(content.length - 100));
-  
-  // Controlla se inizia con { e finisce con }
-  const parsed = JSON.parse(content);
-  console.log("\nFirst keys in JSON:", Object.keys(parsed).slice(0, 5));
-  console.log("Last keys in JSON:", Object.keys(parsed).slice(-5));
+if (evals.length > 0) {
+  const eval_ = evals[0];
+  console.log('Found evaluation:');
+  console.log('ID:', eval_.id);
+  console.log('Manual ID:', eval_.manualId);
+  console.log('Score:', eval_.overallScore);
+  console.log('Verdict:', eval_.verdict);
+  console.log('Content type:', typeof eval_.content);
+  console.log('Content is string:', typeof eval_.content === 'string');
+  console.log('Content length:', eval_.content ? String(eval_.content).length : 0);
+  console.log('First 200 chars:', String(eval_.content).substring(0, 200));
 } else {
-  console.log("No framework found for subject 1");
+  console.log('No evaluations found');
 }
 
-await connection.end();
+process.exit(0);

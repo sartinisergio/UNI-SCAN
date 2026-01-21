@@ -86,6 +86,11 @@ export default function AnalisiDetail() {
     { id: parseInt(params.id || "0") },
     { enabled: !!params.id }
   );
+  
+  const { data: manualEvaluation } = trpc.analyses.getManualEvaluation.useQuery(
+    { analysisId: parseInt(params.id || "0") },
+    { enabled: !!params.id }
+  ) as any;
 
   const generateEmailMutation = trpc.analyses.generateEmail.useMutation({
     onSuccess: (data) => {
@@ -539,10 +544,14 @@ export default function AnalisiDetail() {
 
         {/* Main Content */}
         <Tabs defaultValue="postit" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="postit" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">Post-it</span>
+            </TabsTrigger>
+            <TabsTrigger value="valutazione" className="flex items-center gap-2">
+              <BookMarked className="h-4 w-4" />
+              <span className="hidden sm:inline">Valutazione</span>
             </TabsTrigger>
             <TabsTrigger value="profilo" className="flex items-center gap-2">
               <User className="h-4 w-4" />
@@ -565,6 +574,45 @@ export default function AnalisiDetail() {
               <span className="hidden sm:inline">Email</span>
             </TabsTrigger>
           </TabsList>
+
+          {/* Manual Evaluation Tab */}
+          <TabsContent value="valutazione">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookMarked className="h-5 w-5 text-primary" />
+                  Valutazione del Manuale
+                </CardTitle>
+                <CardDescription>
+                  Report dettagliato della valutazione del manuale rispetto al framework
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {manualEvaluation && typeof manualEvaluation.content === 'string' && manualEvaluation.content.includes('<!DOCTYPE html>') ? (
+                  <div className="w-full overflow-auto">
+                    <iframe
+                      srcDoc={manualEvaluation.content}
+                      style={{
+                        width: '100%',
+                        height: '800px',
+                        border: 'none',
+                        borderRadius: '8px'
+                      }}
+                      title="Valutazione Manuale"
+                    />
+                  </div>
+                ) : manualEvaluation ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>Valutazione non disponibile in formato HTML</p>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>Nessuna valutazione disponibile per questa analisi</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Post-it Tab */}
           <TabsContent value="postit">
@@ -890,26 +938,26 @@ export default function AnalisiDetail() {
                     )}
 
                     {/* Analisi Dettagliata per Modulo - Formato Narrativo */}
-                    {technicalData.copertura_moduli && Array.isArray(technicalData.copertura_moduli) && technicalData.copertura_moduli.length > 0 && (
+                    {(manualEvaluation?.frameworkCoverage?.modules || technicalData?.copertura_moduli) && Array.isArray(manualEvaluation?.frameworkCoverage?.modules || technicalData?.copertura_moduli) && (manualEvaluation?.frameworkCoverage?.modules || technicalData?.copertura_moduli)?.length > 0 && (
                       <div>
                         <h4 className="font-semibold mb-4 flex items-center gap-2">
                           <FileText className="h-4 w-4" />
                           Analisi Dettagliata per Modulo
                         </h4>
                         <div className="space-y-4">
-                          {technicalData.copertura_moduli.map((modulo: any, i: number) => (
+                          {(manualEvaluation?.frameworkCoverage?.modules || technicalData?.copertura_moduli || []).map((modulo: any, i: number) => (
                             <div key={i} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                               <div className="flex items-start justify-between mb-3">
                                 <div className="flex items-center gap-2">
                                   <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">
-                                    {modulo.modulo_id || i + 1}
+                                    {modulo.moduleId || modulo.modulo_id || i + 1}
                                   </span>
-                                  <h5 className="font-semibold">{modulo.modulo_nome}</h5>
+                                  <h5 className="font-semibold">{modulo.moduleName || modulo.modulo_nome}</h5>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Badge variant="outline">{modulo.livello_profondita || 'N/A'}</Badge>
-                                  <Badge className={modulo.copertura_percentuale >= 75 ? 'bg-green-500' : modulo.copertura_percentuale >= 50 ? 'bg-yellow-500' : 'bg-red-500'}>
-                                    {modulo.copertura_percentuale}%
+                                  <Badge className={(modulo.coveragePercentage || modulo.copertura_percentuale || 0) >= 75 ? 'bg-green-500' : (modulo.coveragePercentage || modulo.copertura_percentuale || 0) >= 50 ? 'bg-yellow-500' : 'bg-red-500'}>
+                                    {modulo.coveragePercentage || modulo.copertura_percentuale}%
                                   </Badge>
                                 </div>
                               </div>
@@ -923,14 +971,14 @@ export default function AnalisiDetail() {
                               
                               <div className="grid gap-3 md:grid-cols-2">
                                 {/* Argomenti Coperti */}
-                                {modulo.argomenti_coperti?.length > 0 && (
+                                {(modulo.coveredTopics || modulo.argomenti_coperti)?.length > 0 && (
                                   <div className="bg-green-50 dark:bg-green-950/50 rounded-lg p-3">
                                     <p className="text-xs font-medium text-green-700 dark:text-green-300 mb-2 flex items-center gap-1">
                                       <CheckCircle2 className="h-3 w-3" />
                                       Argomenti Coperti
                                     </p>
                                     <ul className="text-xs space-y-1">
-                                      {modulo.argomenti_coperti.map((arg: string, j: number) => (
+                                      {(modulo.coveredTopics || modulo.argomenti_coperti || []).map((arg: string, j: number) => (
                                         <li key={j} className="flex items-start gap-1">
                                           <ChevronRight className="h-3 w-3 mt-0.5 flex-shrink-0" />
                                           <span>{arg}</span>
@@ -940,15 +988,15 @@ export default function AnalisiDetail() {
                                   </div>
                                 )}
                                 
-                                {/* Argomenti Extra */}
-                                {modulo.argomenti_extra?.length > 0 && (
+                                {/* Argomenti Mancanti */}
+                                {(modulo.missingTopics || modulo.argomenti_extra)?.length > 0 && (
                                   <div className="bg-blue-50 dark:bg-blue-950/50 rounded-lg p-3">
                                     <p className="text-xs font-medium text-blue-700 dark:text-blue-300 mb-2 flex items-center gap-1">
-                                      <Sparkles className="h-3 w-3" />
-                                      Argomenti Extra
+                                      <AlertTriangle className="h-3 w-3" />
+                                      Argomenti Mancanti
                                     </p>
                                     <ul className="text-xs space-y-1">
-                                      {modulo.argomenti_extra.map((arg: string, j: number) => (
+                                      {(modulo.missingTopics || modulo.argomenti_extra || []).map((arg: string, j: number) => (
                                         <li key={j} className="flex items-start gap-1">
                                           <ChevronRight className="h-3 w-3 mt-0.5 flex-shrink-0" />
                                           <span>{arg}</span>

@@ -8,7 +8,8 @@ import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { useState } from "react";
+import { usePublisher } from "@/contexts/PublisherContext";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { 
   BookOpen, 
@@ -25,19 +26,22 @@ import {
   CloudDownload,
   Download
 } from "lucide-react";
+import { ManualComparisonTable } from "@/components/ManualComparisonTable";
 
 export default function DatabaseManuali() {
+  const { selectedPublisher } = usePublisher();
   const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null);
   const [selectedManualId, setSelectedManualId] = useState<number | null>(null);
   const [compareMode, setCompareMode] = useState(false);
   const [selectedForCompare, setSelectedForCompare] = useState<number[]>([]);
+  const [showComparison, setShowComparison] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [uploadManualId, setUploadManualId] = useState<number | null>(null);
   const [indexJson, setIndexJson] = useState("");
   
   const { data: subjects } = trpc.subjects.list.useQuery();
   const { data: manuals, refetch: refetchManuals } = trpc.manuals.listBySubject.useQuery(
-    { subjectId: selectedSubjectId! },
+    { subjectId: selectedSubjectId!, publisher: selectedPublisher },
     { enabled: !!selectedSubjectId }
   );
   
@@ -52,6 +56,11 @@ export default function DatabaseManuali() {
   );
   
   const utils = trpc.useUtils();
+  
+  // Invalidate manuals cache when publisher changes
+  useEffect(() => {
+    utils.manuals.listBySubject.invalidate();
+  }, [selectedPublisher, utils]);
   
   const updateIndexMutation = trpc.manuals.updateIndex.useMutation({
     onSuccess: () => {
@@ -79,22 +88,21 @@ export default function DatabaseManuali() {
     }
   });
   
-  const reimportFromDropboxMutation = trpc.manuals.reimportIndexFromDropbox.useMutation({
+  const regenerateAllEvaluationsMutation = trpc.manuals.regenerateAllEvaluations.useMutation({
     onSuccess: (data) => {
-      toast.success(`Indice reimportato da Dropbox: ${data.chaptersCount} capitoli`);
-      refetchManuals();
-      // Update the textarea with the new content
-      if (uploadManualId) {
-        const manual = manuals?.find(m => m.id === uploadManualId);
-        if (manual?.indexContent) {
-          setIndexJson(JSON.stringify(manual.indexContent, null, 2));
-        }
+      toast.success(`Rigenerazione completata: ${data.successCount} valutazioni generate${data.errorCount > 0 ? `, ${data.errorCount} errori` : ""}`);
+      if (data.errors.length > 0) {
+        data.errors.forEach(err => toast.error(err));
       }
+      utils.evaluations.listBySubject.invalidate();
+      refetchManuals();
     },
     onError: (error) => {
       toast.error(`Errore: ${error.message}`);
     }
   });
+  
+  // reimportFromDropboxMutation rimosso - Dropbox integration completamente eliminata
 
   const toggleCompare = (manualId: number) => {
     if (selectedForCompare.includes(manualId)) {
@@ -119,7 +127,10 @@ export default function DatabaseManuali() {
   };
   
   const handleGenerateEvaluation = (manualId: number) => {
-    const framework = frameworks?.[0];
+    // Use the latest framework version (highest ID)
+    const framework = frameworks?.length ? frameworks.reduce((latest, current) => 
+      (current.id > latest.id) ? current : latest
+    ) : null;
     if (!framework) {
       toast.error("Nessun framework disponibile per questa materia");
       return;
@@ -178,17 +189,40 @@ export default function DatabaseManuali() {
               </div>
               
               {selectedSubjectId && manuals && manuals.length > 1 && (
-                <Button 
-                  variant={compareMode ? "default" : "outline"}
-                  onClick={() => {
-                    setCompareMode(!compareMode);
-                    setSelectedForCompare([]);
-                    setSelectedManualId(null);
-                  }}
-                >
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  {compareMode ? "Esci Confronto" : "Confronta Manuali"}
-                </Button>
+                <>
+                  <Button 
+                    variant={compareMode ? "default" : "outline"}
+                    onClick={() => {
+                      setCompareMode(!compareMode);
+                      setSelectedForCompare([]);
+                      setSelectedManualId(null);
+                    }}
+                  >
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    {compareMode ? "Esci Confronto" : "Confronta Manuali"}
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      if (window.confirm("Rigenerare tutte le valutazioni per questa materia? Questo potrebbe richiedere alcuni minuti.")) {
+                        regenerateAllEvaluationsMutation.mutate({ subjectId: selectedSubjectId });
+                      }
+                    }}
+                    disabled={regenerateAllEvaluationsMutation.isPending}
+                  >
+                    {regenerateAllEvaluationsMutation.isPending ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Rigenerazione in corso...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Rigenera Tutte le Valutazioni
+                      </>
+                    )}
+                  </Button>
+                </>
               )}
             </div>
           </CardContent>
@@ -219,10 +253,10 @@ export default function DatabaseManuali() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
                       <BookOpen className={`h-5 w-5 ${
-                        manual.type === "zanichelli" ? "text-primary" : "text-muted-foreground"
+                        manual.type !== "competitor" ? "text-primary" : "text-muted-foreground"
                       }`} />
-                      <Badge variant={manual.type === "zanichelli" ? "default" : "secondary"}>
-                        {manual.type === "zanichelli" ? "Zanichelli" : "Competitor"}
+                      <Badge variant={manual.type !== "competitor" ? "default" : "secondary"}>
+                        {manual.type !== "competitor" ? manual.type : "Competitor"}
                       </Badge>
                     </div>
                     {compareMode && (
@@ -347,8 +381,7 @@ export default function DatabaseManuali() {
                 <Button 
                   disabled={selectedForCompare.length < 2}
                   onClick={() => {
-                    // TODO: Navigate to compare view
-                    toast.info("Funzionalità in arrivo");
+                    setShowComparison(true);
                   }}
                 >
                   Confronta <ArrowRight className="ml-2 h-4 w-4" />
@@ -358,8 +391,17 @@ export default function DatabaseManuali() {
           </Card>
         )}
 
+        {/* Comparison View */}
+        {showComparison && selectedSubjectId && (
+          <ManualComparisonTable
+            manualIds={selectedForCompare}
+            subjectId={selectedSubjectId}
+            onBack={() => setShowComparison(false)}
+          />
+        )}
+
         {/* Evaluation Detail */}
-        {selectedManualId && !compareMode && (
+        {selectedManualId && !compareMode && !showComparison && (
           <EvaluationDetail manualId={selectedManualId} />
         )}
 
@@ -392,29 +434,8 @@ export default function DatabaseManuali() {
           </DialogHeader>
           
           {/* Action buttons at top */}
-              <div className="flex gap-2 flex-shrink-0">
-            <Button 
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                if (uploadManualId) {
-                  reimportFromDropboxMutation.mutate({ id: uploadManualId });
-                }
-              }}
-              disabled={reimportFromDropboxMutation.isPending}
-            >
-              {reimportFromDropboxMutation.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Importazione...
-                </>
-              ) : (
-                <>
-                  <CloudDownload className="h-4 w-4 mr-2" />
-                  Importa da Dropbox
-                </>
-              )}
-            </Button>
+          <div className="flex gap-2 flex-shrink-0">
+            {/* Pulsante Importa da Dropbox - RIMOSSO */}
           </div>
           
           {/* Scrollable content area */}
@@ -486,6 +507,7 @@ function EvaluationDetail({ manualId }: { manualId: number }) {
   }
 
   const content = evaluation.content as any;
+  const isHtmlReport = typeof content === 'string' && content.includes('<!DOCTYPE html>');
 
   return (
     <Card>
@@ -515,15 +537,29 @@ function EvaluationDetail({ manualId }: { manualId: number }) {
         </div>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="overview">
-          <TabsList className="mb-4">
-            <TabsTrigger value="overview">Panoramica</TabsTrigger>
-            <TabsTrigger value="coverage">Copertura</TabsTrigger>
-            <TabsTrigger value="strengths">Punti di Forza</TabsTrigger>
-            <TabsTrigger value="weaknesses">Punti Deboli</TabsTrigger>
-          </TabsList>
+        {isHtmlReport ? (
+          <div className="w-full overflow-auto">
+            <iframe
+              srcDoc={content}
+              style={{
+                width: '100%',
+                height: '1200px',
+                border: 'none',
+                borderRadius: '8px',
+              }}
+              title="Valutazione Manuale"
+            />
+          </div>
+        ) : (
+          <Tabs defaultValue="overview">
+            <TabsList className="mb-4">
+              <TabsTrigger value="overview">Panoramica</TabsTrigger>
+              <TabsTrigger value="coverage">Copertura</TabsTrigger>
+              <TabsTrigger value="strengths">Punti di Forza</TabsTrigger>
+              <TabsTrigger value="weaknesses">Punti Deboli</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="overview" className="space-y-4">
+            <TabsContent value="overview" className="space-y-4">
             {content?.overview && (
               <>
                 <div>
@@ -663,14 +699,31 @@ function EvaluationDetail({ manualId }: { manualId: number }) {
                 Punti deboli non disponibili
               </p>
             )}
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+          </Tabs>
+        )}
       </CardContent>
     </Card>
   );
 }
 
 function exportEvaluationToHTML(manual: any, evaluation: any, content: any) {
+  // If content is already HTML (new format), download it directly
+  if (typeof content === 'string' && content.includes('<!DOCTYPE')) {
+    const blob = new Blob([content], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const safeTitle = (manual?.title || 'valutazione').replace(/[^a-zA-Z0-9]/g, '_');
+    a.download = `valutazione_${safeTitle}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    return;
+  }
+
+  // Otherwise, generate HTML from JSON (old format)
   const html = `
 <!DOCTYPE html>
 <html lang="it">

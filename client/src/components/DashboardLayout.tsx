@@ -74,9 +74,7 @@ export default function DashboardLayout({
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-primary/5 to-background">
         <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
           <div className="flex flex-col items-center gap-4">
-            <div className="h-16 w-16 rounded-xl bg-primary/10 flex items-center justify-center">
-              <BookOpen className="h-8 w-8 text-primary" />
-            </div>
+            <img src="/logo.png" alt="UNI-SCAN" className="h-32 w-32 object-contain" />
             <h1 className="text-3xl font-bold tracking-tight text-center">
               UNI-SCAN
             </h1>
@@ -175,7 +173,7 @@ function DashboardLayoutContent({
           className="border-r-0"
           disableTransition={isResizing}
         >
-          <SidebarHeader className="h-16 justify-center border-b border-sidebar-border">
+          <SidebarHeader className="h-16 justify-center border-b border-sidebar-border bg-gradient-to-r from-blue-600/10 to-red-600/10">
             <div className="flex items-center gap-3 px-2 transition-all w-full">
               <button
                 onClick={toggleSidebar}
@@ -186,7 +184,7 @@ function DashboardLayoutContent({
               </button>
               {!isCollapsed ? (
                 <div className="flex items-center gap-2 min-w-0">
-                  <BookOpen className="h-5 w-5 text-primary shrink-0" />
+                  <img src="/logo.png" alt="UNI-SCAN" className="h-12 w-12 object-contain shrink-0" />
                   <span className="font-bold tracking-tight truncate text-primary">
                     UNI-SCAN
                   </span>
@@ -274,7 +272,7 @@ function DashboardLayoutContent({
             </div>
           </div>
         )}
-        <main className="flex-1 p-4 md:p-6">{children}</main>
+        <main className="flex-1 p-4 md:p-6 bg-gradient-to-br from-blue-50 via-white to-red-50">{children}</main>
       </SidebarInset>
     </>
   );

@@ -10,7 +10,7 @@ export const users = mysqlTable("users", {
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
-  llmProvider: mysqlEnum("llmProvider", ["manus", "openai"]).default("manus").notNull(),
+  llmProvider: mysqlEnum("llmProvider", ["manus", "openai", "perplexity", "claude"]).default("manus").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -102,6 +102,7 @@ export const manualEvaluations = mysqlTable("manual_evaluations", {
   id: int("id").autoincrement().primaryKey(),
   manualId: int("manualId").notNull(),
   frameworkId: int("frameworkId").notNull(),
+  analysisId: int("analysisId"), // Link to analysis (optional, for Scenario 1)
   content: json("content").notNull(), // Full evaluation JSON
   overallScore: int("overallScore"), // 0-100
   verdict: varchar("verdict", { length: 64 }), // Eccellente, Buono, Sufficiente, Sconsigliato
@@ -127,6 +128,7 @@ export const analyses = mysqlTable("analyses", {
   universityName: varchar("universityName", { length: 255 }),
   professorName: varchar("professorName", { length: 255 }),
   degreeCourse: varchar("degreeCourse", { length: 255 }),
+  degreeClass: varchar("degreeClass", { length: 10 }), // Classe di laurea (es. L-13, L-27, LM-13)
   
   // Bibliografia strutturata
   primaryManualId: int("primaryManualId"), // Manuale principale (dal database)

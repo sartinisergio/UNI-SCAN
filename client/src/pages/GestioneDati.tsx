@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { trpc } from "@/lib/trpc";
+import { usePublisher } from "@/contexts/PublisherContext";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -28,9 +29,82 @@ import {
 
 export default function GestioneDati() {
   const { user } = useAuth();
+  const { selectedPublisher } = usePublisher();
   const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null);
+  const [isCleaningFrameworks, setIsCleaningFrameworks] = useState(false);
+  const [isCreateSubjectDialogOpen, setIsCreateSubjectDialogOpen] = useState(false);
+  const [newSubjectCode, setNewSubjectCode] = useState("");
+  const [newSubjectName, setNewSubjectName] = useState("");
+  const [newSubjectDescription, setNewSubjectDescription] = useState("");
   
   const { data: subjects } = trpc.subjects.list.useQuery();
+  const utils = trpc.useUtils();
+  
+  const createSubjectMutation = trpc.subjects.create.useMutation({
+    onSuccess: () => {
+      toast.success("Materia creata con successo");
+      utils.subjects.list.invalidate();
+      setIsCreateSubjectDialogOpen(false);
+      setNewSubjectCode("");
+      setNewSubjectName("");
+      setNewSubjectDescription("");
+    },
+    onError: (error) => {
+      toast.error(`Errore: ${error.message}`);
+    },
+  });
+  
+  const deleteSubjectMutation = trpc.subjects.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Materia eliminata con successo");
+      utils.subjects.list.invalidate();
+      setSelectedSubjectId(null);
+    },
+    onError: (error) => {
+      toast.error(`Errore: ${error.message}`);
+    },
+  });
+  
+  const handleDeleteSubject = (subjectId: number, subjectName: string) => {
+    if (!confirm(`Sei sicuro di voler eliminare la materia "${subjectName}"? Questa azione non può essere annullata.`)) {
+      return;
+    }
+    deleteSubjectMutation.mutate({ id: subjectId });
+  };
+  
+  const handleCreateSubject = () => {
+    if (!newSubjectCode.trim()) {
+      toast.error("Inserisci il codice della materia");
+      return;
+    }
+    if (!newSubjectName.trim()) {
+      toast.error("Inserisci il nome della materia");
+      return;
+    }
+    createSubjectMutation.mutate({
+      code: newSubjectCode.trim(),
+      name: newSubjectName.trim(),
+      description: newSubjectDescription.trim() || undefined,
+    });
+  };
+  
+  const cleanFrameworksMutation = trpc.frameworks.deactivateAll.useMutation({
+    onSuccess: () => {
+      toast.success("Tutti i framework sono stati disattivati");
+      utils.frameworks.listBySubject.invalidate();
+      setIsCleaningFrameworks(false);
+    },
+    onError: (error) => {
+      toast.error(`Errore: ${error.message}`);
+      setIsCleaningFrameworks(false);
+    }
+  });
+  
+  const handleCleanFrameworks = async () => {
+    if (!confirm("Sei sicuro? Tutti i framework verranno disattivati.")) return;
+    setIsCleaningFrameworks(true);
+    cleanFrameworksMutation.mutate();
+  };
   
   // Redirect non-admin users
   if (user?.role !== "admin") {
@@ -58,16 +132,151 @@ export default function GestioneDati() {
           </p>
         </div>
 
-        {/* Dropbox Import Section */}
-        <DropboxImportSection />
+        {/* Clean Old Frameworks */}
+        <Card className="border-orange-200 bg-orange-50">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-orange-600" />
+              Pulisci Framework Vecchi
+            </CardTitle>
+            <CardDescription>
+              Disattiva tutti i framework importati da Dropbox per fare spazio ai nuovi
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              variant="destructive"
+              onClick={handleCleanFrameworks}
+              disabled={isCleaningFrameworks || cleanFrameworksMutation.isPending}
+            >
+              {isCleaningFrameworks || cleanFrameworksMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Pulizia in corso...
+                </>
+              ) : (
+                <>Disattiva Tutti i Framework</>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Create New Subject */}
+        <Card className="border-blue-200 bg-blue-50">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Plus className="h-5 w-5 text-blue-600" />
+              Crea Nuova Materia
+            </CardTitle>
+            <CardDescription>
+              Aggiungi una nuova materia al sistema
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Dialog open={isCreateSubjectDialogOpen} onOpenChange={setIsCreateSubjectDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="border-blue-300 hover:bg-blue-100">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nuova Materia
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Crea Nuova Materia</DialogTitle>
+                  <DialogDescription>
+                    Inserisci i dettagli della nuova materia
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="subject-code">Codice Materia</Label>
+                    <Input
+                      id="subject-code"
+                      placeholder="es: biochimica"
+                      value={newSubjectCode}
+                      onChange={(e) => setNewSubjectCode(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="subject-name">Nome Materia</Label>
+                    <Input
+                      id="subject-name"
+                      placeholder="es: Biochimica"
+                      value={newSubjectName}
+                      onChange={(e) => setNewSubjectName(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="subject-description">Descrizione (Opzionale)</Label>
+                    <Textarea
+                      id="subject-description"
+                      placeholder="Descrizione della materia..."
+                      value={newSubjectDescription}
+                      onChange={(e) => setNewSubjectDescription(e.target.value)}
+                      className="mt-1"
+                      rows={3}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsCreateSubjectDialogOpen(false)}>
+                    Annulla
+                  </Button>
+                  <Button 
+                    onClick={handleCreateSubject}
+                    disabled={createSubjectMutation.isPending}
+                  >
+                    {createSubjectMutation.isPending ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Creazione in corso...
+                      </>
+                    ) : (
+                      <>Crea Materia</>
+                    )}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </CardContent>
+        </Card>
 
         {/* Subject Selector */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Seleziona Materia</CardTitle>
-            <CardDescription>
-              Scegli la materia per visualizzare e modificare i dati associati
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-base">Seleziona Materia</CardTitle>
+                <CardDescription>
+                  Scegli la materia per visualizzare e modificare i dati associati
+                </CardDescription>
+              </div>
+              {selectedSubjectId && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => {
+                    const subject = subjects?.find(s => s.id === selectedSubjectId);
+                    if (subject) handleDeleteSubject(selectedSubjectId, subject.name);
+                  }}
+                  disabled={deleteSubjectMutation.isPending}
+                >
+                  {deleteSubjectMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Eliminazione...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Elimina Materia
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <Select 
@@ -106,7 +315,7 @@ export default function GestioneDati() {
             </TabsContent>
 
             <TabsContent value="manuals">
-              <ManualsTab subjectId={selectedSubjectId} />
+              <ManualsTab subjectId={selectedSubjectId} selectedPublisher={selectedPublisher} />
             </TabsContent>
           </Tabs>
         )}
@@ -115,176 +324,31 @@ export default function GestioneDati() {
   );
 }
 
-function DropboxImportSection() {
-  const utils = trpc.useUtils();
-  
-  const { data: folderStructure, isLoading: isLoadingStructure, refetch: refetchStructure } = 
-    trpc.dropbox.getFolderStructure.useQuery(undefined, {
-      retry: false,
-    });
-  
-  const importFrameworksMutation = trpc.dropbox.importFrameworks.useMutation({
-    onSuccess: (result) => {
-      if (result.imported > 0) {
-        toast.success(`Importati ${result.imported} framework`);
-      }
-      if (result.errors.length > 0) {
-        toast.warning(`${result.errors.length} errori durante l'importazione`);
-        console.error("Import errors:", result.errors);
-      }
-      utils.frameworks.listBySubject.invalidate();
-      utils.frameworks.getActive.invalidate();
-    },
-    onError: (error) => {
-      toast.error(`Errore: ${error.message}`);
-    },
-  });
-
-  const importZanichelliMutation = trpc.dropbox.importManuals.useMutation({
-    onSuccess: (result) => {
-      if (result.imported > 0) {
-        toast.success(`Importati ${result.imported} manuali Zanichelli`);
-      }
-      if (result.errors.length > 0) {
-        toast.warning(`${result.errors.length} errori durante l'importazione`);
-        console.error("Import errors:", result.errors);
-      }
-      utils.manuals.listBySubject.invalidate();
-    },
-    onError: (error) => {
-      toast.error(`Errore: ${error.message}`);
-    },
-  });
-
-  const importCompetitorMutation = trpc.dropbox.importManuals.useMutation({
-    onSuccess: (result) => {
-      if (result.imported > 0) {
-        toast.success(`Importati ${result.imported} manuali competitor`);
-      }
-      if (result.errors.length > 0) {
-        toast.warning(`${result.errors.length} errori durante l'importazione`);
-        console.error("Import errors:", result.errors);
-      }
-      utils.manuals.listBySubject.invalidate();
-    },
-    onError: (error) => {
-      toast.error(`Errore: ${error.message}`);
-    },
-  });
-
-  const isImporting = importFrameworksMutation.isPending || 
-                      importZanichelliMutation.isPending || 
-                      importCompetitorMutation.isPending;
-
-  const hasDropboxConfig = folderStructure?.success;
-
-  return (
-    <Card className="border-dashed border-2">
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-            <Cloud className="h-5 w-5 text-blue-500" />
-          </div>
-          <div>
-            <CardTitle className="text-base">Importa da Dropbox</CardTitle>
-            <CardDescription>
-              Importa automaticamente framework e manuali dalla cartella Dropbox
-            </CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {!hasDropboxConfig ? (
-          <div className="text-center py-4">
-            <AlertCircle className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground mb-2">
-              {folderStructure?.error || "Configura la chiave API Dropbox nelle Impostazioni per abilitare l'importazione"}
-            </p>
-            <Button variant="outline" size="sm" onClick={() => refetchStructure()}>
-              Riprova
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {/* Folder Status */}
-            <div className="grid gap-2 text-sm">
-              {Object.entries(folderStructure.structure || {}).map(([path, data]) => {
-                const folderData = data as { files: any[]; subfolderCount?: number };
-                const fileCount = folderData.files?.length || 0;
-                const subfolderCount = folderData.subfolderCount || 0;
-                
-                return (
-                  <div key={path} className="flex items-center gap-2 text-muted-foreground">
-                    <FolderOpen className="h-4 w-4" />
-                    <span>{path.split("/").pop()}</span>
-                    <span className="text-xs bg-muted px-2 py-0.5 rounded">
-                      {fileCount} file
-                    </span>
-                    {subfolderCount > 0 && (
-                      <span className="text-xs text-muted-foreground">
-                        ({subfolderCount} sottocartelle)
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Import Buttons */}
-            <div className="flex flex-wrap gap-2 pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => importFrameworksMutation.mutate()}
-                disabled={isImporting}
-              >
-                {importFrameworksMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Download className="h-4 w-4 mr-2" />
-                )}
-                Importa Framework
-              </Button>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => importZanichelliMutation.mutate({ type: "zanichelli" })}
-                disabled={isImporting}
-              >
-                {importZanichelliMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Download className="h-4 w-4 mr-2" />
-                )}
-                Importa Manuali Zanichelli
-              </Button>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => importCompetitorMutation.mutate({ type: "competitor" })}
-                disabled={isImporting}
-              >
-                {importCompetitorMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Download className="h-4 w-4 mr-2" />
-                )}
-                Importa Manuali Competitor
-              </Button>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
+// DropboxImportSection rimosso - Dropbox integration completamente eliminata
 
 function FrameworksTab({ subjectId }: { subjectId: number }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [selectedFramework, setSelectedFramework] = useState<any>(null);
   const [version, setVersion] = useState("");
   const [content, setContent] = useState("");
+  const [fileInputKey, setFileInputKey] = useState(0);
+  
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    try {
+      const text = await file.text();
+      const json = JSON.parse(text);
+      setContent(JSON.stringify(json, null, 2));
+      toast.success("File JSON caricato con successo");
+      setFileInputKey(prev => prev + 1);
+    } catch (error) {
+      toast.error("Errore: il file non è un JSON valido");
+      setFileInputKey(prev => prev + 1);
+    }
+  };
   
   const utils = trpc.useUtils();
   const { data: frameworks, isLoading } = trpc.frameworks.listBySubject.useQuery({ subjectId });
@@ -296,8 +360,35 @@ function FrameworksTab({ subjectId }: { subjectId: number }) {
       utils.frameworks.listBySubject.invalidate({ subjectId });
       utils.frameworks.getActive.invalidate({ subjectId });
       setIsDialogOpen(false);
+      setSelectedFramework(null);
       setVersion("");
       setContent("");
+    },
+    onError: (error) => {
+      toast.error(`Errore: ${error.message}`);
+    },
+  });
+
+  const updateMutation = trpc.frameworks.update.useMutation({
+    onSuccess: () => {
+      toast.success("Framework aggiornato con successo");
+      utils.frameworks.listBySubject.invalidate({ subjectId });
+      utils.frameworks.getActive.invalidate({ subjectId });
+      setIsDialogOpen(false);
+      setSelectedFramework(null);
+      setVersion("");
+      setContent("");
+    },
+    onError: (error) => {
+      toast.error(`Errore: ${error.message}`);
+    },
+  });
+
+  const deleteMutation = trpc.frameworks.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Framework eliminato");
+      utils.frameworks.listBySubject.invalidate({ subjectId });
+      utils.frameworks.getActive.invalidate({ subjectId });
     },
     onError: (error) => {
       toast.error(`Errore: ${error.message}`);
@@ -311,11 +402,21 @@ function FrameworksTab({ subjectId }: { subjectId: number }) {
     }
     try {
       const parsedContent = JSON.parse(content);
-      createMutation.mutate({
-        subjectId,
-        version: version.trim(),
-        content: parsedContent,
-      });
+      if (selectedFramework) {
+        // Update existing framework
+        updateMutation.mutate({
+          id: selectedFramework.id,
+          version: version.trim(),
+          content: parsedContent,
+        });
+      } else {
+        // Create new framework
+        createMutation.mutate({
+          subjectId,
+          version: version.trim(),
+          content: parsedContent,
+        });
+      }
     } catch {
       toast.error("Il contenuto deve essere un JSON valido");
     }
@@ -333,16 +434,23 @@ function FrameworksTab({ subjectId }: { subjectId: number }) {
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button onClick={() => {
+                setSelectedFramework(null);
+                setVersion("");
+                setContent("");
+              }}>
                 <Plus className="h-4 w-4 mr-2" />
                 Nuovo Framework
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Crea Nuovo Framework</DialogTitle>
+                <DialogTitle>{selectedFramework ? "Modifica Framework" : "Crea Nuovo Framework"}</DialogTitle>
                 <DialogDescription>
-                  Definisci un nuovo framework di valutazione per questa materia
+                  {selectedFramework 
+                    ? "Modifica il framework di valutazione esistente"
+                    : "Definisci un nuovo framework di valutazione per questa materia"
+                  }
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
@@ -357,6 +465,16 @@ function FrameworksTab({ subjectId }: { subjectId: number }) {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="content">Contenuto (JSON)</Label>
+                  <div className="flex gap-2 mb-2">
+                    <Input
+                      key={fileInputKey}
+                      type="file"
+                      accept=".json"
+                      onChange={handleFileUpload}
+                      className="flex-1"
+                    />
+                    <span className="text-xs text-muted-foreground self-center">oppure incolla qui sotto</span>
+                  </div>
                   <Textarea
                     id="content"
                     placeholder={`{
@@ -380,9 +498,12 @@ function FrameworksTab({ subjectId }: { subjectId: number }) {
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Annulla
                 </Button>
-                <Button onClick={handleCreate} disabled={createMutation.isPending}>
+                <Button 
+                  onClick={handleCreate} 
+                  disabled={createMutation.isPending || updateMutation.isPending}
+                >
                   <Save className="h-4 w-4 mr-2" />
-                  Salva Framework
+                  {selectedFramework ? "Aggiorna" : "Salva"} Framework
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -411,7 +532,10 @@ function FrameworksTab({ subjectId }: { subjectId: number }) {
                     <div>
                       <p className="font-medium">Versione {fw.version}</p>
                       <p className="text-sm text-muted-foreground">
-                        Creato il {new Date(fw.createdAt).toLocaleDateString("it-IT")}
+                        {fw.updatedAt && new Date(fw.updatedAt).getTime() !== new Date(fw.createdAt).getTime() 
+                          ? `Aggiornato il ${new Date(fw.updatedAt).toLocaleDateString("it-IT")}`
+                          : `Creato il ${new Date(fw.createdAt).toLocaleDateString("it-IT")}`
+                        }
                       </p>
                     </div>
                   </div>
@@ -421,8 +545,41 @@ function FrameworksTab({ subjectId }: { subjectId: number }) {
                         Attivo
                       </span>
                     )}
-                    <Button variant="ghost" size="sm">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => {
+                        setSelectedFramework(fw);
+                        setIsViewDialogOpen(true);
+                      }}
+                      title="Visualizza framework"
+                    >
+                      <FileJson className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => {
+                        setSelectedFramework(fw);
+                        setVersion(fw.version);
+                        setContent(JSON.stringify(fw.content, null, 2));
+                        setIsDialogOpen(true);
+                      }}
+                      title="Modifica framework"
+                    >
                       <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => {
+                        if (confirm(`Sei sicuro di voler eliminare la versione ${fw.version}?`)) {
+                          deleteMutation.mutate({ id: fw.id });
+                        }
+                      }}
+                      title="Elimina framework"
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
                 </div>
@@ -437,12 +594,33 @@ function FrameworksTab({ subjectId }: { subjectId: number }) {
           </div>
         )}
       </CardContent>
+      
+      {/* Dialog per visualizzare il framework */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Framework - Versione {selectedFramework?.version}</DialogTitle>
+            <DialogDescription>
+              Creato il {selectedFramework && new Date(selectedFramework.createdAt).toLocaleDateString("it-IT")}
+              {selectedFramework?.updatedAt && selectedFramework.updatedAt !== selectedFramework.createdAt && (
+                <span> • Aggiornato il {new Date(selectedFramework.updatedAt).toLocaleDateString("it-IT")}</span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 max-h-[calc(90vh-150px)] overflow-y-auto">
+            <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm whitespace-pre-wrap break-words">
+              {selectedFramework && JSON.stringify(selectedFramework.content, null, 2)}
+            </pre>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
 
-function ManualsTab({ subjectId }: { subjectId: number }) {
+function ManualsTab({ subjectId, selectedPublisher }: { subjectId: number; selectedPublisher: string }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [fileInputKey, setFileInputKey] = useState(0);
   const [formData, setFormData] = useState({
     title: "",
     author: "",
@@ -452,6 +630,22 @@ function ManualsTab({ subjectId }: { subjectId: number }) {
     year: "",
     indexContent: "",
   });
+  
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    try {
+      const text = await file.text();
+      const json = JSON.parse(text);
+      setFormData({ ...formData, indexContent: JSON.stringify(json, null, 2) });
+      toast.success("File JSON caricato con successo");
+      setFileInputKey(prev => prev + 1);
+    } catch (error) {
+      toast.error("Errore: il file non è un JSON valido");
+      setFileInputKey(prev => prev + 1);
+    }
+  };
   
   const utils = trpc.useUtils();
   const { data: manuals, isLoading } = trpc.manuals.listBySubject.useQuery({ subjectId });
@@ -470,16 +664,6 @@ function ManualsTab({ subjectId }: { subjectId: number }) {
         year: "",
         indexContent: "",
       });
-    },
-    onError: (error) => {
-      toast.error(`Errore: ${error.message}`);
-    },
-  });
-
-  const deleteMutation = trpc.manuals.delete.useMutation({
-    onSuccess: () => {
-      toast.success("Manuale eliminato");
-      utils.manuals.listBySubject.invalidate({ subjectId });
     },
     onError: (error) => {
       toast.error(`Errore: ${error.message}`);
@@ -512,12 +696,6 @@ function ManualsTab({ subjectId }: { subjectId: number }) {
       year: formData.year ? parseInt(formData.year) : undefined,
       indexContent,
     });
-  };
-
-  const handleDelete = (id: number, title: string) => {
-    if (confirm(`Sei sicuro di voler eliminare "${title}"?`)) {
-      deleteMutation.mutate({ id });
-    }
   };
 
   const zanichelliManuals = manuals?.filter((m) => m.type === "zanichelli") || [];
@@ -613,6 +791,16 @@ function ManualsTab({ subjectId }: { subjectId: number }) {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="indexContent">Indice (JSON)</Label>
+                  <div className="flex gap-2 mb-2">
+                    <Input
+                      key={fileInputKey}
+                      type="file"
+                      accept=".json"
+                      onChange={handleFileUpload}
+                      className="flex-1"
+                    />
+                    <span className="text-xs text-muted-foreground self-center">oppure incolla qui sotto</span>
+                  </div>
                   <Textarea
                     id="indexContent"
                     placeholder={`{
@@ -662,7 +850,7 @@ function ManualsTab({ subjectId }: { subjectId: number }) {
                     <ManualCard 
                       key={manual.id} 
                       manual={manual} 
-                      onDelete={() => handleDelete(manual.id, manual.title)}
+                      subjectId={subjectId}
                     />
                   ))}
                 </div>
@@ -683,7 +871,7 @@ function ManualsTab({ subjectId }: { subjectId: number }) {
                     <ManualCard 
                       key={manual.id} 
                       manual={manual} 
-                      onDelete={() => handleDelete(manual.id, manual.title)}
+                      subjectId={subjectId}
                     />
                   ))}
                 </div>
@@ -704,32 +892,187 @@ function ManualsTab({ subjectId }: { subjectId: number }) {
   );
 }
 
-function ManualCard({ manual, onDelete }: { manual: any; onDelete: () => void }) {
+function ManualCard({ manual, subjectId }: { manual: any; subjectId: number }) {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isViewIndexOpen, setIsViewIndexOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    title: manual.title,
+    author: manual.author,
+    publisher: manual.publisher,
+    edition: manual.edition || "",
+    year: manual.year?.toString() || "",
+  });
+  
+  const utils = trpc.useUtils();
+  
+  const updateMutation = trpc.manuals.update.useMutation({
+    onSuccess: () => {
+      toast.success("Manuale aggiornato con successo");
+      utils.manuals.listBySubject.invalidate({ subjectId });
+      setIsEditDialogOpen(false);
+    },
+    onError: (error) => {
+      toast.error(`Errore: ${error.message}`);
+    },
+  });
+
+  const deleteMutation = trpc.manuals.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Manuale eliminato");
+      utils.manuals.listBySubject.invalidate({ subjectId });
+    },
+    onError: (error) => {
+      toast.error(`Errore: ${error.message}`);
+    },
+  });
+  
+  const handleUpdate = () => {
+    updateMutation.mutate({
+      id: manual.id,
+      title: editFormData.title.trim(),
+      author: editFormData.author.trim(),
+      publisher: editFormData.publisher.trim(),
+      edition: editFormData.edition.trim() || undefined,
+      year: editFormData.year ? parseInt(editFormData.year) : undefined,
+    });
+  };
+
+  const handleDelete = () => {
+    if (confirm(`Sei sicuro di voler eliminare "${manual.title}"?`)) {
+      deleteMutation.mutate({ id: manual.id });
+    }
+  };
+  
   return (
-    <div className="p-3 rounded-lg border border-border flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <BookOpen className="h-5 w-5 text-muted-foreground" />
-        <div>
-          <p className="font-medium">{manual.title}</p>
-          <p className="text-sm text-muted-foreground">
-            {manual.author} • {manual.publisher}
-            {manual.year && ` • ${manual.year}`}
-          </p>
+    <>
+      <div className="p-3 rounded-lg border border-border flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <BookOpen className="h-5 w-5 text-muted-foreground" />
+          <div>
+            <p className="font-medium">{manual.title}</p>
+            <p className="text-sm text-muted-foreground">
+              {manual.author} • {manual.publisher}
+              {manual.year && ` • ${manual.year}`}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {manual.indexContent && (
+            <span className="text-xs bg-green-500/10 text-green-600 px-2 py-1 rounded">
+              Indice presente
+            </span>
+          )}
+          {manual.indexContent && (
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setIsViewIndexOpen(true)}
+              title="Visualizza indice"
+            >
+              <FileJson className="h-4 w-4" />
+            </Button>
+          )}
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setIsEditDialogOpen(true)}
+            title="Modifica manuale"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleDelete}
+            disabled={deleteMutation.isPending}
+          >
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        {manual.indexContent && (
-          <span className="text-xs bg-green-500/10 text-green-600 px-2 py-1 rounded">
-            Indice presente
-          </span>
-        )}
-        <Button variant="ghost" size="sm">
-          <Edit className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="sm" onClick={onDelete}>
-          <Trash2 className="h-4 w-4 text-destructive" />
-        </Button>
-      </div>
-    </div>
+      
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Modifica Manuale</DialogTitle>
+            <DialogDescription>
+              Aggiorna i dettagli del manuale
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="edit-title">Titolo</Label>
+                <Input
+                  id="edit-title"
+                  value={editFormData.title}
+                  onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-author">Autore</Label>
+                <Input
+                  id="edit-author"
+                  value={editFormData.author}
+                  onChange={(e) => setEditFormData({ ...editFormData, author: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-publisher">Editore</Label>
+                <Input
+                  id="edit-publisher"
+                  value={editFormData.publisher}
+                  onChange={(e) => setEditFormData({ ...editFormData, publisher: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-edition">Edizione</Label>
+                <Input
+                  id="edit-edition"
+                  value={editFormData.edition}
+                  onChange={(e) => setEditFormData({ ...editFormData, edition: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-year">Anno</Label>
+                <Input
+                  id="edit-year"
+                  type="number"
+                  value={editFormData.year}
+                  onChange={(e) => setEditFormData({ ...editFormData, year: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Annulla
+            </Button>
+            <Button onClick={handleUpdate} disabled={updateMutation.isPending}>
+              <Save className="h-4 w-4 mr-2" />
+              Salva Modifiche
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* View Index Dialog */}
+      <Dialog open={isViewIndexOpen} onOpenChange={setIsViewIndexOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Indice - {manual.title}</DialogTitle>
+            <DialogDescription>
+              Visualizza l'indice del manuale
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 max-h-[calc(90vh-150px)] overflow-y-auto">
+            <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm whitespace-pre-wrap break-words">
+              {manual.indexContent && JSON.stringify(manual.indexContent, null, 2)}
+            </pre>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

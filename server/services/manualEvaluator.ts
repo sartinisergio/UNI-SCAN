@@ -1,4 +1,5 @@
 import { invokeLLMWithUserPreference } from "./llm";
+import { extractModules, getFrameworkFormat } from "./frameworkNormalizer";
 
 interface ManualIndex {
   capitoli?: Array<{
@@ -312,6 +313,13 @@ export async function generateManualEvaluation(
 ): Promise<EvaluationResult> {
   
   const isEconomics = isEconomicsSubject(subjectName);
+  // Estrai i moduli dalla nuova struttura framework multiclasse
+  // Supporta molteplici formati: modules (Chimica), moduli (generico), syllabus_modules (Istologia)
+  const frameworkModules = extractModules(framework as any);
+  const frameworkFormat = getFrameworkFormat(framework as any);
+  console.log(`[generateManualEvaluation] Framework format detected: ${frameworkFormat}, modules: ${frameworkModules.length}`);
+  console.log(`[generateManualEvaluation] Module names: ${frameworkModules.map(m => m.nome).join(', ')}`);
+  console.log(`[generateManualEvaluation] Framework modules JSON length: ${JSON.stringify(frameworkModules, null, 2).length}`);
   const economicsInstructions = isEconomics ? getEconomicsInstructions() : '';
   
   // Formato JSON per didacticApproach in base alla materia
@@ -320,6 +328,13 @@ export async function generateManualEvaluation(
       "microSequence": "breve-lungo | lungo-breve | integrata | non applicabile",
       "macroSequence": "breve-lungo | lungo-breve | integrata | non applicabile",
       "growthApproach": "Neoclassico (Solow) | Endogeno (Romer) | Istituzionale | Misto | Non trattato"` : '';
+
+  // Crea una versione compatta del framework per ridurre la lunghezza del prompt
+  const compactFramework = frameworkModules.map((m, idx) => ({
+    id: idx + 1,
+    nome: m.nome,
+    argomenti: m.argomenti.slice(0, 8) // Limita a 8 argomenti per modulo
+  }));
 
   const prompt = `Sei un esperto di didattica universitaria e valutazione di manuali accademici di ${subjectName.toUpperCase()}.
 
@@ -334,13 +349,17 @@ INDICE DEL MANUALE:
 ${JSON.stringify(indexContent, null, 2)}
 
 FRAMEWORK DELLA MATERIA "${subjectName}" (moduli e argomenti richiesti):
-${JSON.stringify(framework.moduli, null, 2)}
+${JSON.stringify(compactFramework, null, 2)}
 ${economicsInstructions}
 ISTRUZIONI GENERALI:
-1. Per ogni modulo del framework, valuta la copertura (0-100%) confrontando gli argomenti dell'indice con quelli richiesti
+1. Per ogni modulo del framework:
+   a) Se il modulo ha un array 'argomenti', usalo direttamente
+   b) Se il modulo ha un campo 'core_contents' (descrizione testuale), ESTRAI gli argomenti/concetti chiave da esso
+   c) Valuta la copertura (0-100%) confrontando gli argomenti del modulo con quelli presenti nell'indice del manuale
 2. Identifica punti di forza e debolezze del manuale rispetto al framework di ${subjectName}
 3. Assegna un punteggio complessivo (0-100) e un verdetto
 4. Basa la valutazione ESCLUSIVAMENTE sul framework fornito per ${subjectName}, non su conoscenze generiche
+5. IMPORTANTE: Leggi attentamente il 'core_contents' di ogni modulo per identificare i concetti chiave, anche se non sono esplicitamente elencati come array
 
 RISPONDI ESCLUSIVAMENTE con un JSON valido nel seguente formato:
 {

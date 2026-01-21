@@ -1,0 +1,9 @@
+{
+  "query": "DELETE FROM frameworks WHERE version = '1.0';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2SqZsxfbXQHvi7k.root --database EnsVFtthx7GmB9n2DgDusz --execute DELETE FROM frameworks WHERE version = '1.0';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 115
+}

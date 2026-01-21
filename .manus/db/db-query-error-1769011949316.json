@@ -1,0 +1,8 @@
+{
+  "query": "SELECT m.id, m.title, m.author, me.id as eval_id, me.overall_score, me.verdict, me.generated_at FROM manuals m LEFT JOIN manual_evaluations me ON m.id = me.manualId WHERE m.title LIKE '%Principi di Chimica%' AND m.author LIKE '%Atkins%' LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2SqZsxfbXQHvi7k.root --database EnsVFtthx7GmB9n2DgDusz --execute SELECT m.id, m.title, m.author, me.id as eval_id, me.overall_score, me.verdict, me.generated_at FROM manuals m LEFT JOIN manual_evaluations me ON m.id = me.manualId WHERE m.title LIKE '%Principi di Chimica%' AND m.author LIKE '%Atkins%' LIMIT 1;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'me.overall_score' in 'field list'"
+  ]
+}

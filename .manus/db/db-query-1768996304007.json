@@ -1,0 +1,40 @@
+{
+  "query": "SELECT id, manualId, frameworkId, JSON_LENGTH(content, '$.frameworkCoverage.modules') as module_count FROM manual_evaluations LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2SqZsxfbXQHvi7k.root --database EnsVFtthx7GmB9n2DgDusz --execute SELECT id, manualId, frameworkId, JSON_LENGTH(content, '$.frameworkCoverage.modules') as module_count FROM manual_evaluations LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "manualId": "22",
+      "frameworkId": "5",
+      "module_count": "12"
+    },
+    {
+      "id": "2",
+      "manualId": "1",
+      "frameworkId": "3",
+      "module_count": "12"
+    },
+    {
+      "id": "30001",
+      "manualId": "19",
+      "frameworkId": "5",
+      "module_count": "12"
+    },
+    {
+      "id": "30002",
+      "manualId": "20",
+      "frameworkId": "5",
+      "module_count": "12"
+    },
+    {
+      "id": "30003",
+      "manualId": "21",
+      "frameworkId": "5",
+      "module_count": "12"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tmanualId\tframeworkId\tmodule_count\n1\t22\t5\t12\n2\t1\t3\t12\n30001\t19\t5\t12\n30002\t20\t5\t12\n30003\t21\t5\t12\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

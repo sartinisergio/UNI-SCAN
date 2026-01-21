@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNI-SCAN - Intelligence Commerciale per Editori Universitari</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --primary-lighter: #dbeafe;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --dark: #1f2937;
+            --light: #f8fafc;
+            --border: #e5e7eb;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: #ffffff;
+        }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo img {
+            height: 100px;
+            width: auto;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .cta-button {
+            background: #60a5fa;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            background: #3b82f6;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 6rem 2rem;
+            text-align: center;
+        }
+
+        .hero-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary);
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            padding: 1rem 2rem;
+            border: 2px solid white;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: var(--primary);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Section Spacing */
+        section {
+            padding: 5rem 2rem;
+        }
+
+        section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            text-align: center;
+        }
+
+        section > p {
+            text-align: center;
+            color: #6b7280;
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Problem Section */
+        .problem {
+            background: var(--light);
+        }
+
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .problem-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .problem-card h3 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        /* Solution Section */
+        .solution {
+            background: white;
+        }
+
+        .solution-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .solution-card {
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #f0f9ff 100%);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid var(--primary-light);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .solution-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(30, 64, 175, 0.1);
+        }
+
+        .solution-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .solution-card h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        .solution-card p {
+            color: #6b7280;
+            line-height: 1.8;
+        }
+
+        /* How It Works */
+        .how-it-works {
+            background: var(--light);
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            line-height: 50px;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .step h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .step p {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        /* Features Section */
+        .features {
+            background: white;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature {
+            padding: 1.5rem;
+            border-radius: 8px;
+            background: var(--light);
+            border: 1px solid var(--border);
+        }
+
+        .feature h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .feature p {
+            color: #6b7280;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* FAQ Section */
+        .faq {
+            background: var(--light);
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 3rem auto 0;
+        }
+
+        .faq-item {
+            background: white;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            border: none;
+            width: 100%;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            transition: background 0.3s;
+        }
+
+        .faq-question:hover {
+            background: var(--primary-lighter);
+        }
+
+        .faq-toggle {
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .faq-item.active .faq-toggle {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s;
+            padding: 0 1.5rem;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        .faq-answer p {
+            color: #6b7280;
+            line-height: 1.8;
+        }
+
+        /* Contact Form */
+        .contact {
+            background: white;
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 3rem auto 0;
+            background: var(--light);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-lighter);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-submit {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        .form-submit:hover {
+            background: var(--primary-light);
+        }
+
+        .form-message {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+            display: none;
+        }
+
+        .form-message.success {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+            display: block;
+        }
+
+        .form-message.error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            display: block;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .cta-section h2 {
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        footer p {
+            margin-bottom: 0.5rem;
+        }
+
+        footer a {
+            color: var(--primary-light);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            section h2 {
+                font-size: 1.75rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="logo"><img src="uni-scan-logo.png" alt="UNI-SCAN Logo"> UNI-SCAN</a>
+            <ul class="nav-links">
+                <li><a href="#features">Funzionalità</a></li>
+                <li><a href="#how">Come Funziona</a></li>
+                <li><a href="#faq">FAQ</a></li>
+                <li><a href="#contact" class="cta-button">Richiedi dimostrazione gratuita</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <h1>AI per la Promozione editoriale universitaria</h1>
+            <p>Un'applicazione AI-powered che trasforma l'analisi dei programmi universitari in suggerimenti commerciali per i promotori editoriali.</p>
+            <div class="hero-buttons">
+                <a href="#contact" class="btn-primary">Richiedi una dimostrazione gratuita</a>
+                <a href="#features" class="btn-secondary">Scopri di Più</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section class="problem">
+        <div class="container">
+            <h2>Il Problema</h2>
+            <p>Per gli editori universitari è una sfida significativa posizionare i propri manuali nel mercato accademico.</p>
+            
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <h3>❓ Incertezza</h3>
+                    <p>Come sapere se il tuo manuale è veramente adatto al programma del docente? Quali sono i veri gap di copertura?</p>
+                </div>
+                <div class="problem-card">
+                    <h3>⏱️ Inefficienza</h3>
+                    <p>L'analisi manuale dei programmi è lenta, soggettiva e richiede risorse commerciali significative.</p>
+                </div>
+                <div class="problem-card">
+                    <h3>🎯 Mancanza di Dati</h3>
+                    <p>Senza informazioni approfondite, è difficile per un promotore valutare quale sia l'approccio con il docente più efficace per identificare opportunità reali.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section class="solution">
+        <div class="container">
+            <h2>La soluzione è uno strumento di supporto: UNI-SCAN</h2>
+            <p>Un'intelligenza artificiale che analizza programmi universitari e raccomanda i manuali del tuo catalogo che meglio si allineano alle esigenze didattiche emerse.</p>
+            
+            <div class="solution-grid">
+                <div class="solution-card">
+                    <div class="icon">📋</div>
+                    <h3>Framework Pedagogico</h3>
+                    <p>UNI-SCAN utilizza framework di valutazione creati dall'analisi di un campione significativo di programmi reali per diverse classi di laurea. Questi framework catturano i pattern pedagogici di ogni disciplina e definiscono gli standard di copertura.</p>
+                </div>
+                <div class="solution-card">
+                    <div class="icon">🤖</div>
+                    <h3>Analisi Automatica</h3>
+                    <p>L'IA analizza il programma universitario specifico, identifica il profilo pedagogico del docente, e valuta la copertura di ogni argomento utilizzando il framework della disciplina. Confronta il programma con il manuale adottato e con le eventuali alternative principali indicate nel syllabus del programma.</p>
+                </div>
+                <div class="solution-card">
+                    <div class="icon">📊</div>
+                    <h3>Matching Intelligente</h3>
+                    <p>Dopo aver valutato il programma, i manuali adottati e le alternative, UNI-SCAN identifica il manuale del tuo catalogo che il docente potrebbe suggerire ai suoi studenti per migliorare l'efficacia del programma in esame, fornendo motivazioni basate su dati concreti.</p>
+                </div>
+                <div class="solution-card">
+                    <div class="icon">🏆</div>
+                    <h3>Database Competitor</h3>
+                    <p>Il database di UNI-SCAN contiene non solo i manuali del tuo catalogo, ma anche una raccolta ampia e aggiornabile di manuali competitor. Questo permette confronti realistici e identificazione di opportunità di mercato.</p>
+                </div>
+                <div class="solution-card">
+                    <div class="icon">💡</div>
+                    <h3>Intelligence Commerciale</h3>
+                    <p>Genera strategie personalizzate per ogni docente, con insight su come posizionare il tuo manuale rispetto ai competitor e superare le obiezioni specifiche.</p>
+                </div>
+                <div class="solution-card">
+                    <div class="icon">🎯</div>
+                    <h3>Precisione</h3>
+                    <p>Identifica gap specifici, argomenti extra, e opportunità di miglioramento nel tuo catalogo.</p>
+                </div>
+                <div class="solution-card">
+                    <div class="icon">🔐</div>
+                    <h3>Dati Privati</h3>
+                    <p>I tuoi dati rimangono nel tuo server interno. Nessuna condivisione con terzi.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works" id="how">
+    <div class="container">
+        <h2>Come Funziona</h2>
+        <p>Un processo semplice e veloce per trasformare i programmi universitari in opportunità commerciali.</p>
+        
+        <div class="steps">
+            <div class="step fade-in">
+                <div class="step-number">1</div>
+                <h3>Carica il Programma in Testo</h3>
+                <p>Carica il programma universitario in formato testo (.txt) in UNI-SCAN. Aggiungi il manuale adottato e le eventuali alternative scegliendo dal database di UNI-SCAN</p>
+            </div>
+            <div class="step fade-in">
+                <div class="step-number">2</div>
+                <h3>Valutazione con Framework</h3>
+                <p>UNI-SCAN applica il framework pedagogico della disciplina per analizzare il programma, estrarre gli argomenti chiave, e identificare il profilo pedagogico del docente.</p>
+            </div>
+            <div class="step fade-in">
+                <div class="step-number">3</div>
+                <h3>Confronto Manuali</h3>
+                <p>Valuta il manuale adottato e le eventuali alternative utilizzando lo stesso framework. Identifica gap, punti di forza e opportunità di miglioramento.</p>
+            </div>
+            <div class="step fade-in">
+                <div class="step-number">4</div>
+                <h3>Raccomandazione & Strategia</h3>
+                <p>Propone il miglior manuale dal tuo catalogo che si allinea (o migliora) il programma. Genera una strategia commerciale personalizzata con insight su come posizionare il tuo manuale vs competitor.</p>
+            </div>
+            <div class="step fade-in">
+                <div class="step-number">⚙️</div>
+                <h3>Configurazione API</h3>
+                <p>UNI-SCAN richiede una chiave API di un provider LLM (es. OpenAI, Anthropic, Gemini, Perplexity o altro) per eseguire l'analisi IA. Configura la tua chiave nelle impostazioni dell'applicazione e il sistema è pronto all'uso.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2>Funzionalità Principali</h2>
+            <p>Tutto quello che serve per ottimizzare la tua strategia commerciale universitaria.</p>
+            
+            <div class="features-grid">
+                <div class="feature">
+                    <h4>📋 Gestione Framework</h4>
+                    <p>Crea e personalizza framework di valutazione specifici per le tue discipline e il tuo catalogo.</p>
+                </div>
+                <div class="feature">
+                    <h4>📚 Database Manuali</h4>
+                    <p>Gestisci il tuo catalogo completo con metadati (editore, autore, anno, prezzo, ecc.).</p>
+                </div>
+                <div class="feature">
+                    <h4>🔍 Analisi Profonda</h4>
+                    <p>Valuta la copertura di ogni argomento, identifica gap e opportunità di miglioramento.</p>
+                </div>
+                <div class="feature">
+                    <h4>🤖 Intelligenza Artificiale</h4>
+                    <p>IA avanzata che comprende il contesto pedagogico e genera raccomandazioni intelligenti basate su framework di valutazione reali.</p>
+                </div>
+
+                <div class="feature">
+                    <h4>📥 Esportazione Report</h4>
+                    <p>Esporta analisi e strategie in HTML modificabile per presentazioni e follow-up commerciale.</p>
+                </div>
+                <div class="feature">
+                    <h4>🔄 Storico Analisi</h4>
+                    <p>Accedi a tutte le analisi precedenti per tracciare l'evoluzione dei programmi e delle strategie nel tempo.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <h2>Domande Frequenti</h2>
+            <p>Risposte alle domande più comuni su UNI-SCAN.</p>
+            
+            <div class="faq-container">
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Come funziona l'analisi IA?</span>
+                        <span class="faq-toggle">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>UNI-SCAN utilizza modelli di linguaggio avanzati per analizzare il programma universitario, estrarre gli argomenti chiave, identificare il profilo pedagogico del docente (rigore, approccio didattico, enfasi su teoria/pratica) e valutare come i manuali del tuo catalogo si allineano a questi requisiti. L'analisi è profonda e considera il contesto pedagogico, non solo la corrispondenza di parole chiave.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Quanto tempo ci vuole per analizzare un programma?</span>
+                        <span class="faq-toggle">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>In media, UNI-SCAN analizza un programma universitario in 2-5 minuti, a seconda della complessità e della lunghezza. Questo è significativamente più veloce rispetto all'analisi manuale, che richiederebbe ore di lavoro commerciale.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Quali formati di programma supporta?</span>
+                        <span class="faq-toggle">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>UNI-SCAN supporta file di testo (.txt). Se il tuo programma è in PDF o Word, devi convertirlo manualmente in testo prima di caricarlo in UNI-SCAN.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Come gestisco il mio catalogo di manuali?</span>
+                        <span class="faq-toggle">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Puoi caricare e gestire il tuo catalogo completo all'interno di UNI-SCAN. Per ogni manuale, inserisci metadati come titolo, autore, editore e una descrizione. Il sistema userà questi dati per il matching intelligente con i programmi universitari.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>I miei dati sono al sicuro?</span>
+                        <span class="faq-toggle">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Sì. UNI-SCAN può essere installato sul tuo server interno, garantendo che tutti i dati (programmi, catalogo, analisi) rimangono completamente sotto il tuo controllo. Nessun dato viene condiviso con terzi. È disponibile anche una versione cloud con crittografia end-to-end.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Posso esportare i risultati?</span>
+                        <span class="faq-toggle">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Sì. UNI-SCAN genera report dettagliati in HTML modificabile che puoi scaricare, personalizzare e utilizzare per presentazioni commerciali, email ai docenti, o follow-up con i dipartimenti universitari. Puoi anche esportare i confronti tra manuali.</p>
+                    </div>
+                </div>
+
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Quanti manuali posso gestire?</span>
+                        <span class="faq-toggle">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Non c'è limite. UNI-SCAN è scalabile e può gestire cataloghi di qualsiasi dimensione, da pochi manuali a migliaia. Le performance rimangono ottimali indipendentemente dalla dimensione del catalogo.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                         <span>Di quali credenziali ho bisogno per usare UNI-SCAN?</span>
+                         <span class="faq-toggle">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>UNI-SCAN richiede una chiave API di un provider di modelli linguistici (come OpenAI, Anthropic, Google, o altri). Questa chiave viene utilizzata per eseguire l'analisi IA dei programmi e la valutazione dei manuali. Puoi scegliere il provider che preferisci in base alle tue esigenze e al tuo budget. La configurazione è semplice e avviene nelle impostazioni dell'applicazione.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Come posso iniziare?</span>
+                        <span class="faq-toggle">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Contattaci tramite il form di contatto in questa pagina. Ti forniremo una dimostrazione personalizzata, spiegheremo come UNI-SCAN può ottimizzare la tua strategia commerciale, e discuteremo le opzioni di implementazione (cloud o server interno).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <h2>Richiedi una dimostrazione gratuita</h2>
+            <p>Scopri come UNI-SCAN può trasformare la tua strategia commerciale universitaria. Compila il form e sarai contattato entro 48 ore.</p>
+            
+            <div class="form-container">
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label for="name">Nome Completo *</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="company">Azienda/Editore *</label>
+                        <input type="text" id="company" name="company" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Telefono</label>
+                        <input type="tel" id="phone" name="phone">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Messaggio *</label>
+                        <textarea id="message" name="message" required placeholder="Raccontaci brevemente il tuo interesse per UNI-SCAN e le tue esigenze..."></textarea>
+                    </div>
+
+                    <button type="submit" class="form-submit">Richiedi Demo</button>
+                    <div id="formMessage" class="form-message"></div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Pronto a Trasformare la Tua Strategia Commerciale?</h2>
+            <p>UNI-SCAN è il partner ideale per editori che vogliono scalare il loro approccio commerciale universitario con intelligenza artificiale.</p>
+            <a href="#contact" class="btn-primary">Richiedi una dimostrazione gratuita</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 UNI-SCAN. Tutti i diritti riservati.</p>
+        <p>Sviluppato da <a href="https://zanichelli.it">Sergio Sartini</a></p>
+        <p><a href="mailto:info@uni-scan.it">sartinisergio@gmail.com</a></p>
+    </footer>
+
+    <script>
+        // FAQ Toggle
+        document.querySelectorAll('.faq-question').forEach(button => {
+            button.addEventListener('click', function() {
+                const item = this.closest('.faq-item');
+                item.classList.toggle('active');
+            });
+        });
+
+        // Form Submission
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                company: document.getElementById('company').value,
+                phone: document.getElementById('phone').value,
+                message: document.getElementById('message').value
+            };
+
+            // Simula l'invio (in produzione, invia a un server)
+            console.log('Form Data:', formData);
+            
+            const messageDiv = document.getElementById('formMessage');
+            messageDiv.textContent = '✓ Grazie! Abbiamo ricevuto la tua richiesta. Ti contatteremo entro 24 ore.';
+            messageDiv.classList.add('success');
+            messageDiv.classList.remove('error');
+            
+            // Reset form
+            this.reset();
+            
+            // Nascondi il messaggio dopo 5 secondi
+            setTimeout(() => {
+                messageDiv.classList.remove('success');
+            }, 5000);
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Fade in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.step').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>

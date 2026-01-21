@@ -1,43 +1,45 @@
 /**
  * PDF Parser Service
- * Extracts text content from PDF files
+ * Extracts text content from PDF files using robust OCR
  */
 
-import * as pdfParse from 'pdf-parse';
+import { extractPDFWithOCR } from './pdfOcrExtractor';
+
+const DEFAULT_MAX_CHARACTERS = 60000; // Maximum characters to extract from PDF
 
 export interface ParsedPDF {
   text: string;
   numPages: number;
-  info: {
-    title?: string;
-    author?: string;
-    subject?: string;
-    creator?: string;
-  };
+  isTruncated: boolean;
+  characterCount: number;
+  extractionMethod: 'digital' | 'ocr' | 'failed';
 }
 
 /**
- * Parse PDF buffer and extract text content
+ * Parse PDF buffer and extract text content using OCR
+ * @param buffer - PDF file buffer
+ * @param maxCharacters - Maximum characters to extract (default: 60000)
  */
-export async function parsePDF(buffer: Buffer): Promise<ParsedPDF> {
+export async function parsePDF(buffer: Buffer, maxCharacters: number = 60000): Promise<ParsedPDF> {
   try {
-    // pdf-parse exports a function as default
-    const pdf = (pdfParse as any).default || pdfParse;
-    const data = await pdf(buffer);
+    const result = await extractPDFWithOCR(buffer);
     
     return {
-      text: data.text.trim(),
-      numPages: data.numpages,
-      info: {
-        title: data.info?.Title,
-        author: data.info?.Author,
-        subject: data.info?.Subject,
-        creator: data.info?.Creator,
-      }
+      text: result.text,
+      numPages: result.numPages,
+      isTruncated: result.isTruncated,
+      characterCount: result.characterCount,
+      extractionMethod: result.extractionMethod,
     };
   } catch (error) {
     console.error('[PDF Parser] Error parsing PDF:', error);
-    throw new Error('Failed to parse PDF file');
+    return {
+      text: '',
+      numPages: 0,
+      isTruncated: false,
+      characterCount: 0,
+      extractionMethod: 'failed',
+    };
   }
 }
 
@@ -50,15 +52,21 @@ export function isPDF(content: string): boolean {
 
 /**
  * Extract text from content - handles both plain text and PDF
+ * @param content - Content string or PDF buffer as string
+ * @param maxCharacters - Maximum characters to extract (default: 60000)
  */
-export async function extractText(content: string): Promise<string> {
+export async function extractText(content: string, maxCharacters: number = 60000): Promise<string> {
   if (isPDF(content)) {
     // Convert string back to buffer for PDF parsing
     const buffer = Buffer.from(content, 'binary');
-    const parsed = await parsePDF(buffer);
+    const parsed = await parsePDF(buffer, maxCharacters);
     return parsed.text;
   }
   
-  // Already plain text
+  // Already plain text - truncate if necessary
+  if (content.length > maxCharacters) {
+    return content.substring(0, maxCharacters);
+  }
+  
   return content;
 }
